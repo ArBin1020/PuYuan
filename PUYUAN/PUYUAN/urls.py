@@ -16,9 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from User.views import accountViewSet
+from User.views import accountRegister
 from User import views
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/register/', accountViewSet.as_view({'get': 'list', 'post': 'create'}), name='account-register')
+    path('api/register/', accountRegister.as_view({ 'post': 'create'}), name='account-register')
 ]
