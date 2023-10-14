@@ -6,9 +6,16 @@ from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password,check_password
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.mail import EmailMessage
+import random
+import string
 
-def send_email(email, content):
-    subject = 'PUYUAN 驗證碼'
+def generate_random_code(length=6):
+    characters = string.ascii_letters + string.digits 
+    code = ''.join(random.choice(characters) for _ in range(length))
+    return code
+
+def send_email(subject, email, content):
+    subject = subject
     message = content
     email_from = 'PUYUAN'
     recipient_list = [email]
@@ -32,14 +39,13 @@ class accountRegister(viewsets.ViewSet):
             if serializer.is_valid():
                 user = account(username=username, email=email, password=encrypted_password)
                 user.save()
-                send_email(email, f'username: {username}, password: {password}, email: {email}')
                 return Response({'status': 0, 'message': '成功'})
             return Response({'status': 1, 'message': '失敗 - {}'.format(serializer.errors)})
                 
         except Exception as e:
-            return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
-
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 # token還沒做
+# status = 2還沒做
 class accountLogin(viewsets.ViewSet):
     def login(self, request):
         email = request.data.get('email')
@@ -53,17 +59,24 @@ class accountLogin(viewsets.ViewSet):
             else:
                 return Response({'status': 1, 'message': '電子郵件或密碼錯誤'})
         except Exception as e:
-            return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
 class accountSendCode(viewsets.ViewSet):
     def sendcode(self, request):
         email = request.data.get('email')
         try:
             existing_account = account.objects.filter(email=email).first()
+
             if existing_account:
+                code = generate_random_code()
+                subject = 'PUYUAN 驗證碼'
+                content = f'您的驗證碼為:{code}'
+                send_email(subject, email, content)
+                existing_account.code = code
+                existing_account.save()
                 return Response({'status': 0, 'message': '成功'})
         except Exception as e:
-            return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
 class accountCheckCode(viewsets.ViewSet):
     def checkcode(self,request):
