@@ -17,6 +17,7 @@ def send_email(email, content):
         email.send()
     except:
         return False
+    
 class accountRegister(viewsets.ViewSet):
     def register(self, request):
         email = request.data.get('email')

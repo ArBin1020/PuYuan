@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from PUYUAN.PUYUAN.secret import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -129,3 +130,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Gmail SMTP 服务器地址
+EMAIL_PORT = 587  # Gmail SMTP 端口
+EMAIL_USE_TLS = True  # 使用 TLS 安全连接
+EMAIL_HOST_USER = mail  # 你的 Gmail 邮箱
+EMAIL_HOST_PASSWORD =  mail_password # 你的 Gmail 邮箱密码或应用程序专用密码
