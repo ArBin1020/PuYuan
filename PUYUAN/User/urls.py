@@ -1,9 +1,7 @@
-# urls.py
 from django.urls import path
-from views import accountViewSet
-from . import views
+from .views import *
 
 urlpatterns = [
-    path('api/', views.AccountList.as_view(), name='account-list'),
-    # path('api/register/', accountViewSet.as_view(), name='account-register')
+    # path('register/', accountRegister.as_view({ 'post': 'register'}), name='account-register'),
+    # path('auth/', accountLogin.as_view({'post': 'auth'}), name='account-login'),
 ]
