@@ -24,4 +24,7 @@ urlpatterns = [
     path('api/register', accountRegister.as_view({ 'post': 'register'}), name='account-register'),
     path('api/auth', accountLogin.as_view({ 'post': 'login'}), name='account-login'),
     path('api/verification/send', accountSendCode.as_view({ 'post': 'sendcode'}), name='account-sendcode'),
+    path('api/verification/check', accountCheckCode.as_view({ 'post': 'verify'}), name='account-verify'),
+    path('api/password/forgot', accountForgot.as_view({ 'post': 'resendcode'}), name='account-resendcode'),
+    path('api/password/reset', accountResetPassword.as_view({ 'post': 'resetpassword'}), name='account-resetpassword'),
 ]
