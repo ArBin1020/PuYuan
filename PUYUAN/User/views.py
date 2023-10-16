@@ -93,7 +93,7 @@ class accountCheckCode(viewsets.ViewSet):
             return Response({'status': 0, 'message': '失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
-# 未完成        
+# complete
 class accountForget(viewsets.ViewSet):
     def forgot(self, request):
         email = request.data.get('email')
@@ -107,7 +107,7 @@ class accountForget(viewsets.ViewSet):
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
         
-
+# uncomplete
 class accountRestPassword(viewsets.ViewSet):
     def restpassword(self, request):
         email = request.data.get('email')
@@ -123,14 +123,16 @@ class accountRestPassword(viewsets.ViewSet):
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
+# complete
 class accountRegisterCheck(viewsets.ViewSet):
     def registercheck(self, request):
         email = request.data.get('email')
         try:
             existing_account = account.objects.filter(email=email).first()
             if existing_account:
-                return Response({'status': 1, 'message': '電子郵件已存在'})
-            return Response({'status': 0, 'message': '成功'})
+                existing_account.verify = True
+                return Response({'status': 0, 'message': '成功'})
+            return Response({'status': 1, 'message': '失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
