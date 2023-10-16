@@ -61,6 +61,7 @@ class accountLogin(viewsets.ViewSet):
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
+# complete
 class accountSendCode(viewsets.ViewSet):
     def sendcode(self, request):
         email = request.data.get('email')
@@ -78,7 +79,7 @@ class accountSendCode(viewsets.ViewSet):
             return Response({'status': 1, 'message': '失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
-
+# complete
 class accountCheckCode(viewsets.ViewSet):
     def checkcode(self,request):
         email = request.data.get('email')
@@ -87,14 +88,14 @@ class accountCheckCode(viewsets.ViewSet):
             existing_account = account.objects.filter(email=email).first()
             if existing_account:
                 if existing_account.code == code:
-                    existing_account.verify = True
-                    existing_account.save()
                     return Response({'status': 0, 'message': '成功'})
-            return Response({'status': 1, 'message': '失敗'})
+                else:
+                    return Response({'status': 1, 'message': '驗證碼錯誤'})
+            return Response({'status': 0, 'message': '失敗'})
         except Exception as e:
-            return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
-        
-class accountForgot(viewsets.ViewSet):
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+# complete
+class accountForget(viewsets.ViewSet):
     def forgot(self, request):
         email = request.data.get('email')
         try:
@@ -132,4 +133,40 @@ class accountRegisterCheck(viewsets.ViewSet):
                 return Response({'status': 0, 'message': '成功'})
             return Response({'status': 1, 'message': '失敗'})
         except Exception as e:
-            return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+        
+# uncomplete
+class accountRestPassword(viewsets.ViewSet):
+    def restpassword(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        try:
+            existing_account = account.objects.filter(email=email).first()
+            if existing_account:
+                encrypted_password = make_password(password)
+                existing_account.password = encrypted_password
+                existing_account.save()
+                return Response({'status': 0, 'message': '成功'})
+            return Response({'status': 1, 'message': '失敗'})
+        except Exception as e:
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+
+# complete
+class accountRegisterCheck(viewsets.ViewSet):
+    def registercheck(self, request):
+        email = request.data.get('email')
+        try:
+            existing_account = account.objects.filter(email=email).first()
+            if existing_account:
+                existing_account.verify = True
+                return Response({'status': 0, 'message': '成功'})
+            return Response({'status': 1, 'message': '失敗'})
+        except Exception as e:
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+
+class otherNews(viewsets.ViewSet):
+    def news(self, request):
+        try:
+            return Response({'status': 0, 'message': '成功'})
+        except Exception as e:
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})

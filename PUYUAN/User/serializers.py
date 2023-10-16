@@ -11,4 +11,14 @@ class accountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = account
-        fields = ['username', 'email', 'password', 'code']
+        fields = '__all__'
+
+# class accountOtherSerializer(serializers.ModelSerializer):
+#     email = serializers.EmailField(
+#         validators=[UniqueValidator(queryset=account.objects.all())]
+#     )
+#     code = serializers.CharField(write_only=True, required=False)
+
+#     class Meta:
+#         model = account
+#         fields = '__all__'

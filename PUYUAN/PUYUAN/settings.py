@@ -138,3 +138,5 @@ EMAIL_PORT = 587  # Gmail SMTP 端口
 EMAIL_USE_TLS = True  # 使用 TLS 安全连接
 EMAIL_HOST_USER = mail  # 你的 Gmail 邮箱
 EMAIL_HOST_PASSWORD =  mail_password # 你的 Gmail 邮箱密码或应用程序专用密码
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
