@@ -6,13 +6,6 @@ from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password,check_password
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.mail import EmailMessage
-import random
-import string
-
-def generate_random_code(length=6):
-    characters = string.ascii_letters + string.digits 
-    code = ''.join(random.choice(characters) for _ in range(length))
-    return code
 
 def send_email(subject, email, content):
     subject = subject
@@ -24,7 +17,6 @@ def send_email(subject, email, content):
         email.send()
     except:
         return False
-    
 class accountRegister(viewsets.ViewSet):
     def register(self, request):
         email = request.data.get('email')
@@ -69,7 +61,7 @@ class accountSendCode(viewsets.ViewSet):
             existing_account = account.objects.filter(email=email).first()
 
             if existing_account:
-                code = generate_random_code()
+                code = ''.join(random.choice(string.ascii_letters) for _ in range(5))
                 subject = 'PUYUAN 驗證碼'
                 content = f'您的驗證碼為:{code}'
                 send_email(subject, email, content)
