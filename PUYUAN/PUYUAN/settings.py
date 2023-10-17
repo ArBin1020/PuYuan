@@ -141,3 +141,5 @@ EMAIL_HOST_USER = mail  # 你的 Gmail 邮箱
 EMAIL_HOST_PASSWORD =  mail_password # 你的 Gmail 邮箱密码或应用程序专用密码
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+AUTH_USER_MODEL = 'User.account'

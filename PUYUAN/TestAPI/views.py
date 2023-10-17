@@ -19,9 +19,9 @@ class CreateRandomNews(viewsets.ViewSet):
             group=''.join(random.choice(string.digits) for _ in range(3)),     
             title=''.join(random.choice(string.ascii_letters) for _ in range(5)),  
             message=''.join(random.choice(string.ascii_letters) for _ in range(5)),
-            pushed_at=timezone.now(),  
-            created_at=timezone.now(), 
-            updated_at=timezone.now()  
+            pushed_at=timezone.now().strftime("%Y-%m-%d %H:%M:%S"),  
+            created_at=timezone.now().strftime("%Y-%m-%d %H:%M:%S"), 
+            updated_at=timezone.now().strftime("%Y-%m-%d %H:%M:%S")  
         )
         
         # 儲存這個 news 物件到資料庫
