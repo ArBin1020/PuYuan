@@ -12,20 +12,6 @@ class account(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS =  ['password']
 
-    # groups = models.ManyToManyField(
-    #     'auth.Group',
-    #     related_name='user_groups',
-    #     blank=True,
-    #     verbose_name='groups'
-    # )
-    
-    # user_permissions = models.ManyToManyField(
-    #     'auth.Permission',
-    #     related_name='user_permissions',
-    #     blank=True,
-    #     verbose_name='user permissions'
-    # )
-
     def __str__(self):
         return self.username
     
