@@ -11,6 +11,10 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.sessions.models import Session
 import random
 import string
+
+from django.contrib.sessions.models import Session
+from django.contrib.auth import get_user_model
+from django.core.exceptions import SuspiciousOperation
 def send_email(subject, email, content):
     subject = subject
     message = content
@@ -47,15 +51,14 @@ class accountLogin(viewsets.ViewSet):
         try:
             existing_account = account.objects.filter(email=email).first()
             if existing_account and check_password(password, existing_account.password):
+                request.session.flush()
+                request.session['user_id'] = existing_account.email
+                request.session.save()
+                session_key = request.session.session_key
 
-                # request.session.flush()
-                # request.session['user_id'] = existing_account.id
-                # request.session.save()
-                # session_key = request.session.session_key
-                request.session.create()
                 if existing_account.verify == False:
                     return Response({'status': 2, 'message': '信箱未驗證'})
-                return Response({'status': 0, 'message': '成功', 'token': request.session.session_key})
+                return Response({'status': 0, 'message': '成功', 'token': session_key})
             else:
                 return Response({'status': 1, 'message': '電子郵件或密碼錯誤'})
         except Exception as e:
@@ -105,11 +108,9 @@ class accountForget(viewsets.ViewSet):
         try:
             existing_account = account.objects.filter(email=email).first()
             if existing_account:
-                uid = urlsafe_base64_encode(str(existing_account.pk).encode())
                 token = default_token_generator.make_token(existing_account)
-                reset_link = f"http://localhost:8000/resetpassword/?uid={uid}&token={token}"
                 subject = 'PUYUAN 忘記密碼'
-                content = f'請點擊以下連結以重設密碼:{reset_link}'
+                content = f'您的用戶token為:{token}'
                 send_email(subject, email, content)
                 return Response({'status': 0, 'message': '成功'})
             return Response({'status': 1, 'message': '失敗'})
@@ -121,14 +122,16 @@ class accountResetPassword(viewsets.ViewSet):
     def reset(self, request):
         password = request.data.get('password')
         try:
-            sdata = Session.objects.get(session_key=request.data.get('token'))
-            print(sdata.get_decoded())
-            # existing_account = account.objects.filter(email=email).first()
-            # if existing_account:
-            #     encrypted_password = make_password(password)
-            #     existing_account.password = encrypted_password
-            #     existing_account.save()
-                # return Response({'status': 0, 'message': '成功'})
+            authorization_header = request.META.get('HTTP_AUTHORIZATION')
+            if authorization_header:
+                print(authorization_header)
+                parts = authorization_header.split()
+                if len(parts) == 2 and parts[0].lower() == 'bearer':
+                    token = parts[1]
+                    user_or_session_data = decode_session_data(token)
+            print(token)
+            print(user_or_session_data)
+
             return Response({'status': 1, 'message': '失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
@@ -156,3 +159,24 @@ class OtherShare(viewsets.ViewSet):
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
         
+
+
+def decode_session_data(token):
+    try:
+        session = Session.objects.get(session_key=token)
+        # 检查 session 是否已过期
+        
+        # 获取 session 数据
+        session_data = session.get_decoded()
+        
+        # 假设您存储了用户的 ID 在会话数据中
+        user_id = session_data.get('user_id')
+        
+        # 使用用户 ID 获取用户对象
+        User = get_user_model()
+        user = User.objects.get(pk=user_id)
+        
+        # 返回用户对象或会话数据，或二者组合
+        return user  # 或者 return session_data
+    except Session.DoesNotExist:
+        raise SuspiciousOperation("Session 不存在")
