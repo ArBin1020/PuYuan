@@ -1,7 +1,9 @@
 from django.db import models
-
+from User.models import account
+from django.db.models.fields.related import ForeignKey
 # Create your models here.
 class UserProfile(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     birthday = models.CharField(max_length=50)
     height = models.FloatField()

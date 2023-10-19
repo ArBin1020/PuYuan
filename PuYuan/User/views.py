@@ -159,15 +159,16 @@ class Othernews(viewsets.ViewSet):
 
 
 class OtherShare(viewsets.ViewSet):
+    @extract_user_id
     def share(self, request):
         try:
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts = authorization_header.split()
-                if len(parts) == 2 and parts[0].lower() == 'bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-            
+            # authorization_header = request.META.get('HTTP_AUTHORIZATION')
+            # if authorization_header:
+            #     parts = authorization_header.split()
+            #     if len(parts) == 2 and parts[0].lower() == 'bearer':
+            #         token = parts[1]
+            #         user_id = decode_session_data(token)
+            user_id = request.user_id
             data_type = request.data.get('type')
             share_id = request.data.get('id')
             relation_type = request.data.get('relation_type')
@@ -186,7 +187,13 @@ class OtherShare(viewsets.ViewSet):
 class OtherViewShare(viewsets.ViewSet):
     def ViewShare(self, request):
         try:
-            pass
+            authorization_header = request.META.get('HTTP_AUTHORIZATION')
+            if authorization_header:
+                parts = authorization_header.split()
+                if len(parts) == 2 and parts[0].lower() == 'bearer':
+                    token = parts[1]
+                    user_id = decode_session_data(token)
+            return ({'status': 1, 'message': f'失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
