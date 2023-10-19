@@ -35,3 +35,10 @@ class news(models.Model):
         db_table = 'news'
         verbose_name = 'news'
         verbose_name_plural = verbose_name
+
+class share(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
+    data_type = models.IntegerField()
+    relation_type = models.IntegerField()
+    # share_id = models.IntegerField()
+    
