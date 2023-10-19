@@ -1,3 +1,9 @@
 Pipfile
 Pipfile.lock
+<<<<<<< HEAD
 secret.py
+=======
+secret.py
+migration
+__pycache__
+>>>>>>> 93779151c454867eba54b74730baa7b6227e71e7

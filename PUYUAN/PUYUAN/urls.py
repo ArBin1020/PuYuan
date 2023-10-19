@@ -23,5 +23,5 @@ urlpatterns = [
     # path('api', include('User.urls')),
     path('', include('User.urls')),
     path('test/',include('TestAPI.urls')),
-
+    path('', include('Body.urls')),
 ]

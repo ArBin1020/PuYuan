@@ -5,7 +5,8 @@ from .models import UserProfile
 #     class Meta:
 #         model = news
 #         fields = '__all__'
-class BodyUserProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = '__all__'
+

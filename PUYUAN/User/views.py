@@ -1,25 +1,16 @@
 
-from .models import account, news
-from .serializers import accountSerializer, OtherSerializer
+from .models import account, news, share
+from .serializers import accountSerializer, OtherSerializer, ShareSerializer
 from rest_framework import viewsets
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password,check_password
-from django.contrib.sessions.middleware import SessionMiddleware
-from django.core.mail import EmailMessage
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
 import random
 import string
-def send_email(subject, email, content):
-    subject = subject
-    message = content
-    email_from = 'PUYUAN'
-    recipient_list = [email]
-    try:
-        email = EmailMessage(subject, message, email_from, recipient_list)
-        email.send()
-    except:
-        return False
+
+from utils import *
+
 # complete
 class accountRegister(viewsets.ViewSet):
     def register(self, request):
@@ -27,9 +18,6 @@ class accountRegister(viewsets.ViewSet):
         password = request.data.get('password')
         username = request.data.get('username')
         try:
-            # existing_account = account.objects.filter(email=email).first()
-            # if existing_account:
-            #     return Response({'status': 1, 'message': '電子郵件已存在'})
             encrypted_password = make_password(password)
             serializer = accountSerializer(data=request.data)
             if serializer.is_valid():
@@ -53,6 +41,7 @@ class accountLogin(viewsets.ViewSet):
                 request.session['user_id'] = existing_account.id
                 request.session.save()
                 session_key = request.session.session_key
+
                 if existing_account.verify == False:
                     return Response({'status': 2, 'message': '信箱未驗證'})
                 return Response({'status': 0, 'message': '成功', 'token': session_key})
@@ -105,32 +94,41 @@ class accountForget(viewsets.ViewSet):
         try:
             existing_account = account.objects.filter(email=email).first()
             if existing_account:
-                uid = urlsafe_base64_encode(str(existing_account.pk).encode())
                 token = default_token_generator.make_token(existing_account)
-                reset_link = f"http://localhost:8000/resetpassword/?uid={uid}&token={token}"
                 subject = 'PUYUAN 忘記密碼'
-                content = f'請點擊以下連結以重設密碼:{reset_link}'
+                content = f'您的用戶token為:{token}'
                 send_email(subject, email, content)
                 return Response({'status': 0, 'message': '成功'})
             return Response({'status': 1, 'message': '失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
-# 還沒做
+# complete
 class accountResetPassword(viewsets.ViewSet):
     def reset(self, request):
         password = request.data.get('password')
         try:
-            existing_account = account.objects.filter(email=email).first()
-            if existing_account:
-                encrypted_password = make_password(password)
-                existing_account.password = encrypted_password
-                existing_account.save()
-                return Response({'status': 0, 'message': '成功'})
+            authorization_header = request.META.get('HTTP_AUTHORIZATION')
+            if authorization_header:
+                parts = authorization_header.split()
+                if len(parts) == 2 and parts[0].lower() == 'bearer':
+                    token = parts[1]
+                    user_id = decode_session_data(token)
+                    if user_id:
+                        try:
+                            user = account.objects.get(id=user_id)
+                            user.password = make_password(password)
+                            user.save()
+                            return Response({'status': 0, 'message': '密碼已更新'})
+                        except account.DoesNotExist:
+                            return Response({'status': 1, 'message': '用戶不存在'})
+                    return Response({'status': 1, 'message': '失敗'})
             return Response({'status': 1, 'message': '失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
-        
+
+
+# complete
 class accountRegisterCheck(viewsets.ViewSet):
     def registercheck(self, request):
         email = request.data.get('email')
@@ -142,14 +140,66 @@ class accountRegisterCheck(viewsets.ViewSet):
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
         
-
-class OtherShare(viewsets.ViewSet):
+# complete
+class Othernews(viewsets.ViewSet):
     def news(self, request):
-        try:            
-            latest_news = news.objects.latest('created_at', 'pushed_at', 'updated_at')
+        try:
+            authorization_header = request.META.get('HTTP_AUTHORIZATION')
+            if authorization_header:
+                parts = authorization_header.split()
+                if len(parts) == 2 and parts[0].lower() == 'bearer':
+                    token = parts[1]
+                    user_id = decode_session_data(token)
+            latest_news = news.objects.filter(user=user_id).latest('created_at', 'pushed_at', 'updated_at')
             serializer = OtherSerializer(latest_news)
             return Response({'status': 0, 'message': '成功', 'news': serializer.data})
         
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
-        
+
+
+class OtherShare(viewsets.ViewSet):
+    def share(self, request):
+        try:
+            authorization_header = request.META.get('HTTP_AUTHORIZATION')
+            if authorization_header:
+                parts = authorization_header.split()
+                if len(parts) == 2 and parts[0].lower() == 'bearer':
+                    token = parts[1]
+                    user_id = decode_session_data(token)
+            data_type = request.data.get('type')
+            share_id = request.data.get('id')
+            relation_type = request.data.get('relation_type')
+            user_account = account.objects.get(id=user_id)
+
+            user_share = share(user=user_account, data_type=data_type, relation_type=relation_type)
+            user_share.save()
+            
+            return Response({'status': 0, 'message': '成功'})
+        except account.DoesNotExist:
+            return Response({'status': 1, 'message': '失敗'})
+        except Exception as e:
+            return Response({'status': 1, 'message': f'分享失敗 - {str(e)}'})
+
+    def ViewShare(self, request):
+        try:
+            
+            authorization_header = request.META.get('HTTP_AUTHORIZATION')
+            if authorization_header:
+                parts = authorization_header.split()
+                if len(parts) == 2 and parts[0].lower() == 'bearer':
+                    token = parts[1]
+                    user_id = decode_session_data(token)
+                    data_type = request.data.get('type')
+                    shares = share.objects.filter(user=user_id,data_type=data_type)
+
+                    # 使用Serializer将数据序列化为JSON
+                    serializer = ShareSerializer(shares, many=True)
+
+                    return Response({'status': 0, 'message': '成功', 'records': serializer.data})
+                else:
+                    return Response({'status': 1, 'message': '授权标头格式无效'})
+            else:
+                return Response({'status': 1, 'message': '缺少授权标头'})
+        except Exception as e:
+            return Response({'status': 1, 'message': f'失敗 - {str(e)})'})

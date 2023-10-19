@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import account, news
+from .models import account, news, share
 from rest_framework.validators import UniqueValidator
 
 class accountSerializer(serializers.ModelSerializer):
@@ -30,4 +30,10 @@ class OtherSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = news
+        fields = '__all__'
+
+
+class ShareSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = share
         fields = '__all__'
