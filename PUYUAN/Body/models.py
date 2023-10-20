@@ -2,7 +2,7 @@ from django.db import models
 from User.models import account
 from django.db.models.fields.related import ForeignKey
 # Create your models here.
-
+from django.db.models.fields import DateTimeField
 class UserDefault(models.Model):
     user = models.ForeignKey(account, on_delete=models.CASCADE)
     sugar_delta_max = models.FloatField(default=10.0)
@@ -115,3 +115,86 @@ class BloodSuger(models.Model):
         verbose_name = '血糖'
         verbose_name_plural = '血糖'
 
+class Diet(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
+    description = models.CharField(max_length=100)
+    meal = models.IntegerField()
+    tag = models.CharField(max_length=100)
+    image = models.IntegerField()
+    lat = models.FloatField()
+    lng = models.FloatField()
+    recorded_at = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.id
+    
+    class Meta:
+        db_table = 'Body_Diet'
+        verbose_name = '飲食日記'
+        verbose_name_plural = '飲食日記'
+
+
+class A1c(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
+    aic = models.CharField(max_length=50)
+    recorded_at = DateTimeField()
+    created_at = DateTimeField()
+    updated_at = DateTimeField()
+
+    def __str__(self):
+        return self.id
+    
+    class Meta:
+        db_table = 'Body_A1c'
+        verbose_name = 'A1c'
+        verbose_name_plural = 'A1c'
+
+class Medical(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
+    diabets_type = models.IntegerField()
+    oad = models.IntegerField()
+    insulin = models.IntegerField()
+    antu_hypertensive = models.IntegerField()
+    created_at = DateTimeField()
+    updated_at = DateTimeField()
+
+    def __str__(self):
+        return self.id
+    
+    class Meta:
+        db_table = 'Body_Medical'
+        verbose_name = '病史'
+        verbose_name_plural = '病史'
+
+
+class Drug_Used(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
+    data_type = models.IntegerField()
+    name = models.CharField(max_length=100)
+    recorded_at = DateTimeField()
+    updated_at = DateTimeField()
+    created_at = DateTimeField()
+
+    def __str__(self):
+        return self.id
+    
+    class Meta:
+        db_table = 'Body_Drug_Used'
+        verbose_name = '藥物使用紀錄'
+        verbose_name_plural = '藥物使用紀錄'
+
+class Care(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
+    member_id = models.IntegerField()
+    reply_id = models.IntegerField()
+    message = models.CharField(max_length=100)
+    created_at = DateTimeField()
+    updated_at = DateTimeField()
+
+    def __str__(self):
+        return self.id
+    
+    class Meta:
+        db_table = 'Body_Care'
+        verbose_name = '照護者'
+        verbose_name_plural = '照護者'
