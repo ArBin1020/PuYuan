@@ -8,7 +8,9 @@ from utils import *
 from User.models import account
 # from rest_framework.views import APIView
 from django.utils import timezone
+
 class BodyUserProfile(viewsets.ViewSet):
+    # complete
     def setprofile(self, request):
         try:
             authorization_header = request.META.get('HTTP_AUTHORIZATION')
@@ -44,6 +46,7 @@ class BodyUserProfile(viewsets.ViewSet):
 
     def getuserprofile(self, request):
         try:
+            
             authorization_header = request.META.get('HTTP_AUTHORIZATION')
             if authorization_header:
                 parts = authorization_header.split()
@@ -52,10 +55,13 @@ class BodyUserProfile(viewsets.ViewSet):
                     user_id = decode_session_data(token)
                     user_account = account.objects.get(id=user_id)
 
+
+                    user_profile = UserSerializer(user_account)
+                    return Response({'status': 0, 'message': '成功', 'user': user_profile.data})
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
-
+# complete
 class BodyUserDefault(viewsets.ViewSet):
     def userdefault(self, request):
         try:
@@ -78,7 +84,7 @@ class BodyUserDefault(viewsets.ViewSet):
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
         
-
+# complete
 class BodyUserSetting(viewsets.ViewSet):
     def usersetting(self, request):
         try:
@@ -115,7 +121,8 @@ class BodyUserSetting(viewsets.ViewSet):
                 return Response({'status': 1, 'message': '失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
-        
+
+# complete      
 class BodyBloodPressure(viewsets.ViewSet):
     def bloodpressure(self, request):
         try:
@@ -147,6 +154,7 @@ class BodyBloodPressure(viewsets.ViewSet):
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
+# complete
 class BodyWeight(viewsets.ViewSet):
     def weight(self, request):
         try:
@@ -157,15 +165,19 @@ class BodyWeight(viewsets.ViewSet):
                     token = parts[1]
                     user_id = decode_session_data(token)
                     user_account = account.objects.get(id=user_id)
-                    try:
-                        weight = Weight.objects.get(user=user_account)
-                        weight.delete()
-                    except Weight.DoesNotExist:
-                        pass
+                    # try:
+                    #     weight = Weight.objects.get(user=user_account)
+                    #     weight.delete()
+                    # except Weight.DoesNotExist:
+                    #     pass
                     weight = request.data.get('weight')
+                    body_fat = request.data.get('body_fat')
+                    bmi = request.data.get('bmi')
                     recorded_at = request.data.get('recorded_at')
                     weight = Weight(user=user_account,
                                     weight=weight,
+                                    body_fat=body_fat,
+                                    bmi=bmi,
                                     recorded_at=recorded_at
                                     )
                     weight.save()
@@ -174,6 +186,7 @@ class BodyWeight(viewsets.ViewSet):
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
+# complete
 class BodyBloodSuger(viewsets.ViewSet):
     def bloodsuger(self, request):
         try:
@@ -184,11 +197,11 @@ class BodyBloodSuger(viewsets.ViewSet):
                     token = parts[1]
                     user_id = decode_session_data(token)
                     user_account = account.objects.get(id=user_id)
-                    try:
-                        blood_suger = BloodSuger.objects.get(user=user_account)
-                        blood_suger.delete()
-                    except BloodSuger.DoesNotExist:
-                        pass
+                    # try:
+                    #     blood_suger = BloodSuger.objects.get(user=user_account)
+                    #     blood_suger.delete()
+                    # except BloodSuger.DoesNotExist:
+                    #     pass
                     sugar = request.data.get('sugar')
                     timeperiod = request.data.get('timeperiod')
                     recorded_at = request.data.get('recorded_at')
@@ -236,9 +249,11 @@ class BodyBloodSuger(viewsets.ViewSet):
 #         except Exception as e:
 #             return Response({'status':1,'message':f'失敗 - {str(e)}'})
 
+# class BodyGetDiet(viewsets.ViewSet):
+
 
 class BodyDiet(viewsets.ViewSet):
-    def bodydiet(self, request):
+    def diet(self, request):
         try:
             authorization_header = request.META.get('HTTP_AUTHORIZATION')
             if authorization_header:
@@ -273,8 +288,10 @@ class BodyDiet(viewsets.ViewSet):
 # class BodyDelDiet(viewsets.ViewSet):
 #   pass
 
-class BodyGetA1c(viewsets.ViewSet):
-    def getA1C(self, request):
+
+
+class BodyA1c(viewsets.ViewSet):
+    def getA1c(self, request):
         try:
             authorization_header = request.META.get('HTTP_AUTHORIZATION')
             if authorization_header:
@@ -290,7 +307,6 @@ class BodyGetA1c(viewsets.ViewSet):
         except Exception as e:
             return Response({'status':1,'message':f'失敗 - {str(e)}'})
 
-class BodyPostdA1c(viewsets.ViewSet):
     def postA1c(self, request):
         try:
             authorization_header = request.META.get('HTTP_AUTHORIZATION')
@@ -301,12 +317,12 @@ class BodyPostdA1c(viewsets.ViewSet):
                     user_id = decode_session_data(token)
                     user_account = account.objects.get(id=user_id)
 
-                    A1c = request.data.get('A1c')
-                    recordet_at = request.data.get('recordet_at')
+                    data_A1c = request.data.get('A1c')
+                    recorded_at = request.data.get('recorded_at')
 
                     A1c = A1c(user=user_account,
-                              A1c=A1c,
-                              recordet_at=recordet_at,
+                              a1c=data_A1c,
+                              recorded_at=recorded_at,
                               created_at=timezone.now(),
                               updated_at=timezone.now()
                               )
@@ -316,7 +332,6 @@ class BodyPostdA1c(viewsets.ViewSet):
         except Exception as e:
             return Response({'status':1,'message':f'失敗 - {str(e)}'})
         
-class BodyDelA1c(viewsets.ViewSet):
     def delA1c(self, request):
         try:
             authorization_header = request.META.get('HTTP_AUTHORIZATION')

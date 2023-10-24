@@ -52,6 +52,19 @@ class UserSetting(models.Model):
         verbose_name = '使用者設定'
         verbose_name_plural = '使用者設定'
 
+
+class unread_records(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
+    unread_1 = models.IntegerField()
+    unread_2 = models.IntegerField()
+    unread_3 = models.IntegerField()
+
+class vip(models.Model):
+    user = ForeignKey(account, on_delete=models.CASCADE)
+    level = models.IntegerField()
+    remark = models.FloatField(max_length=100)
+    started_at = models.CharField(max_length=50)
+
 class UserProfile(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -64,13 +77,17 @@ class UserProfile(models.Model):
     fcm_id = models.CharField(max_length=100)
     address = models.CharField(max_length=100)
 
+    # unread_records = models.OneToOneField('unread_records', on_delete=models.CASCADE)
+    # default = models.OneToOneField('UserDefault', on_delete=models.CASCADE)
+    # setting = models.OneToOneField('UserSetting', on_delete=models.CASCADE)
+    # vip = models.OneToOneField('vip', on_delete=models.CASCADE)
+
     def __str__(self):
         return self.name
     class Meta:
         db_table = 'Body_User_Profile'
         verbose_name = '使用者資料'
         verbose_name_plural = '使用者資料'
-
 
 class BloodPressure(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
@@ -106,7 +123,7 @@ class BloodSuger(models.Model):
     timeperiod = models.IntegerField()
     recorded_at = models.CharField(max_length=50)
     drug = models.IntegerField()
-    exercise = models.IntegerField()
+    execrise = models.IntegerField()
 
     def __str__(self):
         return self.id
@@ -136,7 +153,7 @@ class Diet(models.Model):
 
 class A1c(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
-    aic = models.CharField(max_length=50)
+    a1c = models.CharField(max_length=50)
     recorded_at = DateTimeField()
     created_at = DateTimeField()
     updated_at = DateTimeField()

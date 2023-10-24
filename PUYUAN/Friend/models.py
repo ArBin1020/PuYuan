@@ -5,7 +5,7 @@ class Friend(models.Model):
     user = models.ForeignKey(account, on_delete=models.CASCADE, related_name='user')
     friend = models.ForeignKey(account, on_delete=models.CASCADE, related_name='friend', null=True)
     relation_id = models.IntegerField(default=1)
-    type = models.IntegerField(null=True)
+    data_type = models.IntegerField(null=True)
     status = models.IntegerField(default=0)
     read = models.IntegerField(default=0)
     code = models.CharField(max_length=100, unique=True)
