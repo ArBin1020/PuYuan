@@ -5,18 +5,18 @@ from utils import *
 from User.models import account
 from rest_framework.response import Response
 # Create your views here.
+
+
 class Friend_Get_Code(viewsets.ViewSet):
     def get_code(self, request):
         try:
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts = authorization_header.split()
-                if len(parts) == 2 and parts[0].lower() == 'bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-                    user_account = account.objects.get(id=user_id)
+            user_account = get_token(request)
+            if user_account:
+                return Response({'status': 0, 'message': '成功', 'code': user_account.friend_code})
+            else:
+                return Response({'status': 1, 'message': '失敗'})
                     
-        except Exception as e:
+        except Exception as e:  
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
 class Friend_Get_List(viewsets.ViewSet):
