@@ -108,21 +108,22 @@ class accountResetPassword(viewsets.ViewSet):
     def reset(self, request):
         password = request.data.get('password')
         try:
+            # user_account = get_token(request)
             authorization_header = request.META.get('HTTP_AUTHORIZATION')
             if authorization_header:
-                parts = authorization_header.split()
-                if len(parts) == 2 and parts[0].lower() == 'bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-                    if user_id:
-                        try:
-                            user = account.objects.get(id=user_id)
-                            user.password = make_password(password)
-                            user.save()
-                            return Response({'status': 0, 'message': '密碼已更新'})
-                        except account.DoesNotExist:
-                            return Response({'status': 1, 'message': '用戶不存在'})
+                token = authorization_header.split()
+                if not (len(token) == 2 and token[0].lower() == 'bearer'):
                     return Response({'status': 1, 'message': '失敗'})
+                    # token = parts[1]
+                user_id = decode_session_data(token[1])
+                if user_id:
+                    try:
+                        user = account.objects.get(id=user_id)
+                        user.password = make_password(password)
+                        user.save()
+                        return Response({'status': 0, 'message': '密碼已更新'})
+                    except account.DoesNotExist:
+                        return Response({'status': 1, 'message': '用戶不存在'})
             return Response({'status': 1, 'message': '失敗'})
         except Exception as e:
             return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
@@ -134,7 +135,7 @@ class accountRegisterCheck(viewsets.ViewSet):
         email = request.data.get('email')
         try:
             existing_account = account.objects.filter(email=email).first()
-            if existing_account and existing_account.verify == 1:
+            if existing_account:
                 return Response({'status': 0, 'message': '成功'})
             return Response({'status': 1, 'message': '失敗'})
         except Exception as e:

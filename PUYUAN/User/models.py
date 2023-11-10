@@ -6,7 +6,7 @@ from django.db.models.fields.related import ForeignKey
 class account(AbstractUser):
 
     email = models.CharField(max_length=50, unique=True)
-    username = models.CharField(max_length=50,unique=False)
+    username = models.CharField(max_length=50)
     code = models.CharField(max_length=50)
     verify = models.BooleanField(default=False)
 
