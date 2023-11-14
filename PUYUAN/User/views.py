@@ -194,7 +194,7 @@ class OtherShare(viewsets.ViewSet):
                     data_type = request.data.get('type')
                     shares = share.objects.filter(user=user_id,data_type=data_type)
 
-                    # 使用Serializer将数据序列化为JSON
+                    
                     serializer = ShareSerializer(shares, many=True)
 
                     return Response({'status': 0, 'message': '成功', 'records': serializer.data})

@@ -46,18 +46,12 @@ class BodyUserProfile(viewsets.ViewSet):
 
     def getuserprofile(self, request):
         try:
+            user_account = get_token(request)
+            print(user_account)
+            user_profile = UserProfileSerializer(user_account)
             
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts = authorization_header.split()
-                if len(parts) == 2 and parts[0].lower() == 'bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-                    user_account = account.objects.get(id=user_id)
-
-
-                    user_profile = UserSerializer(user_account)
-                    return Response({'status': 0, 'message': '成功', 'user': user_profile.data})
+            print(user_profile.data)
+            return Response({'status': 0, 'message': '成功', 'user': user_profile.data})
         except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
