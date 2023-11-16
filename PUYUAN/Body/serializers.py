@@ -15,25 +15,25 @@ class UserSettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSetting
         fields = '__all__'
-        exclude = ['user']
+        # exclude = ['user']
 
 class UserDefaultSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDefault
         fields = '__all__'
-        exclude = ['user']
+        # exclude = ['user']
 
 class UservipSerializer(serializers.ModelSerializer):
     class Meta:
         model = vip
         fields = '__all__'
-        exclude = ['user']
+        # exclude = ['user']
 
 class UserUnread_RecordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = unread_records
         fields = '__all__'
-        exclude = ['user']
+        # exclude = ['user']
 
 class UserSerializer(serializers.ModelSerializer):
     # class Meta:

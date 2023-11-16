@@ -18,8 +18,6 @@ class account(AbstractUser):
     
     class Meta:
         db_table = 'User_Account'
-        verbose_name = 'account'
-        verbose_name_plural = verbose_name
     
 class news(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)

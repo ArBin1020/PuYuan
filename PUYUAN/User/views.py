@@ -1,5 +1,7 @@
 
-from .models import account, news, share
+from .models import *
+from Body.models import *
+from Friend.models import *
 from .serializers import accountSerializer, OtherSerializer, ShareSerializer
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -16,18 +18,26 @@ class accountRegister(viewsets.ViewSet):
     def register(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        username = request.data.get('username')
         try:
             encrypted_password = make_password(password)
             serializer = accountSerializer(data=request.data)
             if serializer.is_valid():
-                user = account(username=username, email=email, password=encrypted_password)
+                user = account(email=email, password=encrypted_password)
                 user.save()
-                return Response({'status': 0, 'message': '成功'})
-            return Response({'status': 1, 'message': '失敗 - {}'.format(serializer.errors)})
+                user_id = account.objects.filter(email=email).first().id
+                print(user_id)
+                UserProfile.objects.create(user_id=user_id, name="USER_"+str(user_id), invite_code=random.randint(100000, 999999))
+                UserDefault.objects.create(user_id=user_id)
+                UserSetting.objects.create(user_id=user_id)
+                vip.objects.create(user_id=user_id)
+                Medical.objects.create(user_id=user_id)
+                Friend.objects.create(user_id=user_id, friend_id=user_id, relation_id=1, data_type=1, status=1, read=1)
+                return Response({'status': "0", 'message': '成功'})
+            return Response({'status': "1", 'message': '失敗 - {}'.format(serializer.errors)})
                 
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            print(e)
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
         
 # complete
 class accountLogin(viewsets.ViewSet):
@@ -43,12 +53,12 @@ class accountLogin(viewsets.ViewSet):
                 session_key = request.session.session_key
 
                 if existing_account.verify == False:
-                    return Response({'status': 2, 'message': '信箱未驗證'})
-                return Response({'status': 0, 'message': '成功', 'token': session_key})
+                    return Response({'status': "2", 'message': '信箱未驗證', 'token': ""})
+                return Response({'status': "0", 'message': '成功', 'token': session_key})
             else:
-                return Response({'status': 1, 'message': '電子郵件或密碼錯誤'})
+                return Response({'status': "1", 'message': '電子郵件或密碼錯誤', 'token': ""})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
 
 # complete
 class accountSendCode(viewsets.ViewSet):
@@ -64,10 +74,10 @@ class accountSendCode(viewsets.ViewSet):
                 send_email(subject, email, content)
                 existing_account.code = code
                 existing_account.save()
-                return Response({'status': 0, 'message': '成功'})
-            return Response({'status': 1, 'message': '失敗'})
+                return Response({'status': "0", 'message': '成功'})
+            return Response({'status': "1", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
 
 # complete
 class accountCheckCode(viewsets.ViewSet):
@@ -80,12 +90,12 @@ class accountCheckCode(viewsets.ViewSet):
                 if existing_account.code == code:
                     existing_account.verify = True
                     existing_account.save()
-                    return Response({'status': 0, 'message': '成功'})
+                    return Response({'status': "0", 'message': '成功'})
                 else:
-                    return Response({'status': 1, 'message': '驗證碼錯誤'})
-            return Response({'status': 0, 'message': '失敗'})
+                    return Response({'status': "1", 'message': '驗證碼錯誤'})
+            return Response({'status': "0", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
 
 # complete
 class accountForget(viewsets.ViewSet):
@@ -98,109 +108,77 @@ class accountForget(viewsets.ViewSet):
                 subject = 'PUYUAN 忘記密碼'
                 content = f'您的用戶token為:{token}'
                 send_email(subject, email, content)
-                return Response({'status': 0, 'message': '成功'})
-            return Response({'status': 1, 'message': '失敗'})
+                print(token)
+                return Response({'status': "0", 'message': '成功'})
+            return Response({'status': "1", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
 
 # complete
 class accountResetPassword(viewsets.ViewSet):
     def reset(self, request):
         password = request.data.get('password')
         try:
-            # user_account = get_token(request)
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                token = authorization_header.split()
-                if not (len(token) == 2 and token[0].lower() == 'bearer'):
-                    return Response({'status': 1, 'message': '失敗'})
-                    # token = parts[1]
-                user_id = decode_session_data(token[1])
-                if user_id:
-                    try:
-                        user = account.objects.get(id=user_id)
-                        user.password = make_password(password)
-                        user.save()
-                        return Response({'status': 0, 'message': '密碼已更新'})
-                    except account.DoesNotExist:
-                        return Response({'status': 1, 'message': '用戶不存在'})
-            return Response({'status': 1, 'message': '失敗'})
+            user_id = get_token(request)
+            if user_id:
+                try:
+                    user = account.objects.get(id=user_id)
+                    user.password = make_password(password)
+                    user.save()
+                    return Response({'status': "0", 'message': '密碼已更新'})
+                except account.DoesNotExist:
+                    return Response({'status': "1", 'message': '用戶不存在'})
+            return Response({'status': "1", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': 1, 'message': '失敗 - {}'.format(str(e))})
+            return Response({'status': "1", 'message': '失敗 - {}'.format(str(e))})
 
 
 # complete
 class accountRegisterCheck(viewsets.ViewSet):
     def registercheck(self, request):
-        email = request.data.get('email')
         try:
-            existing_account = account.objects.filter(email=email).first()
+            existing_account = account.objects.filter(email=request.data.get('email')).first()
             if existing_account:
-                return Response({'status': 0, 'message': '成功'})
-            return Response({'status': 1, 'message': '失敗'})
+                return Response({'status': "1", 'message': '失敗'})
+            return Response({'status': "0", 'message': '成功'})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
         
 # complete
 class Othernews(viewsets.ViewSet):
     def news(self, request):
         try:
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts = authorization_header.split()
-                if len(parts) == 2 and parts[0].lower() == 'bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-            latest_news = news.objects.filter(user=user_id).latest('created_at', 'pushed_at', 'updated_at')
+            latest_news = news.objects.filter(user=get_token(request)).latest('created_at', 'pushed_at', 'updated_at')
             serializer = OtherSerializer(latest_news)
-            return Response({'status': 0, 'message': '成功', 'news': serializer.data})
-        
+            return Response({'status': "0", 'message': '成功', 'news': serializer.data})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
 
 
 class OtherShare(viewsets.ViewSet):
     def share(self, request):
         try:
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts = authorization_header.split()
-                if len(parts) == 2 and parts[0].lower() == 'bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
             data_type = request.data.get('type')
             share_id = request.data.get('id')
             relation_type = request.data.get('relation_type')
-            user_account = account.objects.get(id=user_id)
+            user_account = account.objects.get(id=get_token(request))
 
             user_share = share(user=user_account, data_type=data_type, relation_type=relation_type)
             user_share.save()
             
-            return Response({'status': 0, 'message': '成功'})
+            return Response({'status': "0", 'message': '成功'})
         except account.DoesNotExist:
-            return Response({'status': 1, 'message': '失敗'})
+            return Response({'status': "1", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': 1, 'message': f'分享失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'分享失敗 - {str(e)}'})
 
     def ViewShare(self, request):
         try:
-            
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts = authorization_header.split()
-                if len(parts) == 2 and parts[0].lower() == 'bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-                    data_type = request.data.get('type')
-                    shares = share.objects.filter(user=user_id,data_type=data_type)
-
-                    
-                    serializer = ShareSerializer(shares, many=True)
-
-                    return Response({'status': 0, 'message': '成功', 'records': serializer.data})
-                else:
-                    return Response({'status': 1, 'message': '授权标头格式无效'})
-            else:
-                return Response({'status': 1, 'message': '缺少授权标头'})
+            user_id = get_token(request)
+            # data_type = request.data.get('type')
+            # shares = share.objects.filter(user=user_id,data_type=data_type)
+            shares = share.objects.filter(user=user_id)
+            serializer = ShareSerializer(shares, many=True) 
+            return Response({'status': "0", 'message': '成功', 'records': serializer.data})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)})'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)})'})
