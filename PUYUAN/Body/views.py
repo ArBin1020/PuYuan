@@ -558,12 +558,12 @@ class BodyPostCare(viewsets.ViewSet):
                     reply_id = request.data.get('reply_id')
                     message = request.data.get('message')
                     care = Care(user=user_account,
-                              member_id=member_id,
-                              reply_id=reply_id,
-                              message=message,
-                              created_at=timezone.now(),
-                              updated_at=timezone.now()
-                              )
+                                member_id=member_id,
+                                reply_id=reply_id,
+                                message=message,
+                                created_at=timezone.now(),
+                                updated_at=timezone.now()
+                                )
                     care.save()
                     return Response({'status':0,'message':'成功'})
                 return Response({'status':1,'message':'失敗'})
