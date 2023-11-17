@@ -3,6 +3,9 @@ from User.models import account
 from django.db.models.fields.related import ForeignKey
 # Create your models here.
 from django.db.models.fields import DateTimeField
+import pytz
+
+tz = pytz.timezone('America/Sao_Paulo')
 class UserDefault(models.Model):
     user = models.ForeignKey(account, on_delete=models.CASCADE)
     sugar_delta_max = models.FloatField(default=10.0)
@@ -27,13 +30,15 @@ class UserDefault(models.Model):
     bmi_min = models.FloatField(default=1.0)
     body_fat_max = models.FloatField(default=10.0)
     body_fat_min = models.FloatField(default=1.0)
+    
+    created_at = models.DateTimeField(auto_now_add=True,)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.id
+    
     class Meta:
         db_table = 'Body_User_Default'
-        verbose_name = '使用者預設值'
-        verbose_name_plural = '使用者預設值'
 
 class UserSetting(models.Model):
     user = models.ForeignKey(account, on_delete=models.CASCADE)
@@ -45,6 +50,8 @@ class UserSetting(models.Model):
     unit_of_weight = models.BooleanField(default=True)
     unit_of_height = models.BooleanField(default=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.id
     class Meta:
@@ -59,41 +66,45 @@ class unread_records(models.Model):
     unread_2 = models.IntegerField()
     unread_3 = models.IntegerField()
 
+
+
 class vip(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
-    level = models.IntegerField()
-    remark = models.FloatField(max_length=100)
-    started_at = models.CharField(max_length=50)
+    level = models.IntegerField(default=1)
+    remark = models.FloatField(max_length=100, default=1.0)
+    started_at = models.DateTimeField(auto_now_add=True)
+
+    ended_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class UserProfile(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    birthday = models.CharField(max_length=50)
-    height = models.FloatField()
-    weight = models.FloatField()
-    phone = models.CharField(max_length=50)
-    email = models.CharField(max_length=100)
-    gender = models.BooleanField()
+    birthday = models.CharField(max_length=50,default="2020-01-01")
+    height = models.FloatField(default=1.0)
+    weight = models.FloatField(default=1.0)
+    phone = models.CharField(max_length=50,default="2020-01-01 01:01:00")
+    email = models.CharField(max_length=100,default="2020-01-01 01:01:00")
+    gender = models.BooleanField(default=True)
     fcm_id = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
+    address = models.CharField(max_length=100,default="abc")
 
-    # unread_records = models.OneToOneField('unread_records', on_delete=models.CASCADE)
-    # default = models.OneToOneField('UserDefault', on_delete=models.CASCADE)
-    # setting = models.OneToOneField('UserSetting', on_delete=models.CASCADE)
-    # vip = models.OneToOneField('vip', on_delete=models.CASCADE)
+    invite_code = models.IntegerField(default=1)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
     class Meta:
         db_table = 'Body_User_Profile'
-        verbose_name = '使用者資料'
-        verbose_name_plural = '使用者資料'
 
 class BloodPressure(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
-    systolic = models.IntegerField()
-    diastolic = models.IntegerField()
-    pulse = models.IntegerField()
+    systolic = models.IntegerField(default=1)
+    diastolic = models.IntegerField(default=1)
+    pulse = models.IntegerField(default=1)
     recorded_at = models.CharField(max_length=50)
 
     def __str__(self):
@@ -112,11 +123,9 @@ class Weight(models.Model):
 
     def __str__(self):
         return self.id
+    
     class Meta:
         db_table = 'Body_Weight'
-        verbose_name = '體重'
-        verbose_name_plural = '體重'
-
 class BloodSuger(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
     sugar = models.FloatField()
@@ -127,10 +136,9 @@ class BloodSuger(models.Model):
 
     def __str__(self):
         return self.id
+    
     class Meta:
         db_table = 'Body_Blood_Suger'
-        verbose_name = '血糖'
-        verbose_name_plural = '血糖'
 
 class Diet(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
@@ -147,16 +155,14 @@ class Diet(models.Model):
     
     class Meta:
         db_table = 'Body_Diet'
-        verbose_name = '飲食日記'
-        verbose_name_plural = '飲食日記'
 
 
 class A1c(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
     a1c = models.CharField(max_length=50)
-    recorded_at = DateTimeField()
-    created_at = DateTimeField()
-    updated_at = DateTimeField()
+    recorded_at = DateTimeField(auto_now_add=True)
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.id
@@ -168,12 +174,12 @@ class A1c(models.Model):
 
 class Medical(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
-    diabets_type = models.IntegerField()
-    oad = models.IntegerField()
-    insulin = models.IntegerField()
-    antu_hypertensive = models.IntegerField()
-    created_at = DateTimeField()
-    updated_at = DateTimeField()
+    diabets_type = models.IntegerField(default=1)
+    oad = models.IntegerField(default=1)
+    insulin = models.IntegerField(default=1)
+    antu_hypertensive = models.IntegerField(default=1)
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.id
@@ -188,9 +194,9 @@ class Drug_Used(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
     data_type = models.IntegerField()
     name = models.CharField(max_length=100)
-    recorded_at = DateTimeField()
-    updated_at = DateTimeField()
-    created_at = DateTimeField()
+    recorded_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now_add=True)
+    created_at = DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.id
@@ -205,8 +211,8 @@ class Care(models.Model):
     member_id = models.IntegerField()
     reply_id = models.IntegerField()
     message = models.CharField(max_length=100)
-    created_at = DateTimeField()
-    updated_at = DateTimeField()
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.id

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import Friend
+from .models import *
 from utils import *
 from User.models import account
 from rest_framework.response import Response
@@ -10,45 +10,54 @@ from rest_framework.response import Response
 class Friend_Get_Code(viewsets.ViewSet):
     def get_code(self, request):
         try:
-            user_account = get_token(request)
-            if user_account:
-                return Response({'status': 0, 'message': '成功', 'code': user_account.friend_code})
-            else:
-                return Response({'status': 1, 'message': '失敗'})
-                    
-        except Exception as e:  
+            user_id = get_token(request)
+            invite = Invite.objects.get(user_id=user_id)
+            return Response({'status': 0, 'message': '成功', 'invite_code': invite.code})
+        except Exception as e:
             return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
 
 class Friend_Get_List(viewsets.ViewSet):
     def get_list(self, request):
-        authorization_header = request.META.get('HTTP_AUTHORIZATION')
-        if authorization_header:
-            parts = authorization_header.split()
-            if len(parts) == 2 and parts[0].lower() == 'bearer':
-                token = parts[1]
-                user_id = decode_session_data(token)
-                user_account = account.objects.get(id=user_id)
+        user_id = get_token(request)
+        friend_list = Friend.objects.filter(user_id=user_id, status=1).only('friend','data_type')
+        print(friend_list)
+        # if friend_list:
+
 
 class Friend_Get_Request(viewsets.ViewSet):
     def get_request(self, request):
-        authorization_header = request.META.get('HTTP_AUTHORIZATION')
-        if authorization_header:
-            parts = authorization_header.split()
-            if len(parts) == 2 and parts[0].lower() == 'bearer':
-                token = parts[1]
-                user_id = decode_session_data(token)
-                user_account = account.objects.get(id=user_id)
-
-
+        try:
+            user_id =  get_token(request)
+            friend = Friend.objects.filter(friend_id=user_id, status=0)
+            response = []
+            for f in friend:
+                response.append({
+                    'id': f.id,
+                    'user_id': f.user_id,
+                    'relation_id': f.relation_id,
+                    'type': f.data_type,
+                    'status': f.status,
+                    'read': f.read,
+                    'created_at': f.created_at,
+                    'updated_at': f.updated_at,
+                    'relation' : {
+                        'id' : 2,
+                        'name': '',
+                        'account': 'fb_2'
+                    }
+                })
+            return Response({'status': 0, 'message': '成功', 'requests': response})
+        except Exception as e:
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+        
 class Friend_Send(viewsets.ViewSet):
     def send(self, request):
-        authorization_header = request.META.get('HTTP_AUTHORIZATION')
-        if authorization_header:
-            parts = authorization_header.split()
-            if len(parts) == 2 and parts[0].lower() == 'bearer':
-                token = parts[1]
-                user_id = decode_session_data(token)
-                user_account = account.objects.get(id=user_id)
+        try:
+            user_id = get_token(request)
+
+        except Exception as e:
+            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+        
 
 
 class Friend_Accept(viewsets.ViewSet):

@@ -20,9 +20,10 @@ def get_token(request):
             if len(parts) == 2 and parts[0].lower() == 'bearer':
                 token = parts[1]
                 user_id = decode_session_data(token)
-                user_account = account.objects.get(id=user_id)
-                return user_account
-    except:
+                # user_account = account.objects.get(id=user_id)
+                return user_id
+    except Exception as e:
+        print(e)
         return False
 
 def send_email(subject, email, content):
