@@ -23,5 +23,8 @@ urlpatterns = [
     path('api/user/blood/sugar',BodyBloodSuger.as_view({'post':'bloodsuger'}),name='bodysugar'),
 
     #05 就醫資訊
-    path('api/user/medical',BodyGetMedical.as_view({'post':'getmedical'}),name='bodymedical'),
+    path('api/user/medical',BodyGetMedical.as_view({'get':'getmedical','patch':'patchmedical'}),name='bodymedical'),
+
+    #07 關懷資訊
+    path('api/user/care',BodyCare.as_view({'get':'getcare','post':'postcare'}),name='bodycare'),
 ]

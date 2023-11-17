@@ -237,9 +237,9 @@ class BodyBloodSuger(viewsets.ViewSet):
                                      drug=drug,
                                      execrise=execrise)
             blood_suger.save()
-            return Response({'status':0,'message':'成功'})
+            return Response({'status':"0",'message':'成功'})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
 # class Records(viewsets.ViewSet):
 #     def records(self, request):
@@ -265,10 +265,10 @@ class BodyBloodSuger(viewsets.ViewSet):
 #                                        recorded_at=recorded_at
 #                                        )
 #                     records.save()
-#                     return Response({'status':0,'message':'成功'})
-#                 return Response({'status':1,'message':'失敗'})
+#                     return Response({'status':"0",'message':'成功'})
+#                 return Response({'status':"1",'message':'失敗'})
 #         except Exception as e:
-#             return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+#             return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
 
 class BodyGetDiet(viewsets.ViewSet):
     def getdiet(self, request):
@@ -336,9 +336,9 @@ class BodyDiet(viewsets.ViewSet):
                         recorded_at=recorded_at
                         )
             diet.save()
-            return Response({'status':0,'message':'成功','image_url':'https://www.puyuan.tech/media'})
+            return Response({'status':"0",'message':'成功','image_url':'https://www.puyuan.tech/media'})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
 
 class BodyDelDiet(viewsets.ViewSet):
     def deldiet(self, request):
@@ -350,28 +350,33 @@ class BodyDelDiet(viewsets.ViewSet):
             print(blood_sugar_id)
             diet = Diet.objects.filter(user=user_account)
             # diet.delete()
-            return Response({'status':0,'message':'成功'})
+            return Response({'status':"0",'message':'成功'})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
 
 
 
 class BodyA1c(viewsets.ViewSet):
     def getA1c(self, request):
         try:
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts=authorization_header.split()
-                if len(parts)==2 and parts[0].lower()=='bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-                    user_account = account.objects.get(id=user_id)
-                    A1c = A1c.objects.filter(user=user_account)
-                    serializer = BodyA1cSerializer(A1c, many=True)
-                    return Response({'status':0,'message':'成功','a1cs':serializer.data})
+            user_account = account.objects.get(id=get_token(request))
+            a1c = A1c.objects.filter(user=user_account)
+            response = []
+            for a in a1c:
+                a1c_data = {
+                    "id": user_account.id,
+                    "user_id": user_account.id,
+                    "a1c": a.a1c,
+                    "recorded_at": a.recorded_at,
+                    "created_at": a.created_at,
+                    "updated_at": a.updated_at
+                }
+                response.append(a1c_data)
+            # serializer = BodyA1cSerializer(A1c, many=True)
+            return Response({'status':"0",'message':'成功','a1cs':response})
 
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
 
     def postA1c(self, request):
         try:
@@ -393,10 +398,10 @@ class BodyA1c(viewsets.ViewSet):
                               updated_at=timezone.now()
                               )
                     A1c.save()
-                    return Response({'status':0,'message':'成功'})
-                return Response({'status':1,'message':'失敗'})
+                    return Response({'status':"0",'message':'成功'})
+                return Response({'status':"1",'message':'失敗'})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
     def delA1c(self, request):
         try:
@@ -410,60 +415,76 @@ class BodyA1c(viewsets.ViewSet):
 
                     A1c = A1c.objects.filter(user=user_account)
                     A1c.delete()
-                    return Response({'status':0,'message':'成功'})
-                return Response({'status':1,'message':'失敗'})
+                    return Response({'status':"0",'message':'成功'})
+                return Response({'status':"1",'message':'失敗'})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
 
 class BodyGetMedical(viewsets.ViewSet):
     def getmedical(self, request):
         try:
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts=authorization_header.split()
-                if len(parts)==2 and parts[0].lower()=='bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-                    user_account = account.objects.get(id=user_id)
+            user_account = account.objects.get(id=get_token(request))
 
-                    medical = Medical.objects.filter(user=user_account)
-                    serializer = BodyMedicalSerializer(medical, many=True)
-                    return Response({'status':0,'message':'成功','medical':serializer.data})
+            medical = Medical.objects.get(user=user_account)
+            response = {
+                "id" : user_account.id,
+                "user_id" : user_account.id,
+                "diabetes_type" : medical.diabetes_type,
+                "oad" : medical.oad,
+                "insulin" : medical.insulin,
+                "anti_hypertensives" : medical.anti_hypertensives,
+                "created_at" : medical.created_at,
+                "updated_at" : medical.updated_at
+            }
+            print(response)
+            return Response({'status':"0",'message':'成功','medical_info':response})
+        except Medical.DoesNotExist:
+            return Response({'status':"1",'message':'失敗 - 未找到醫療記錄'}, status=404)
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
     def patchmedical(self, request):
         try:
-            user_id = get_token(request)
+            user_account = account.objects.get(id=get_token(request))
+            try:
+                medical = Medical.objects.get(user=user_account)
+                print(medical)
+                medical.delete()
+            except UserDefault.DoesNotExist:
+                pass
+            medical = Medical(user=user_account)
+            medical.save()
+            return Response({'status': "0", 'message': '成功'})
+            
         except Exception as e:
             print(e)
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
-class BodyPostMedical(viewsets.ViewSet):
-    def postmedical(self, request):
-        try:
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts=authorization_header.split()
-                if len(parts)==2 and parts[0].lower()=='bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-                    user_account = account.objects.get(id=user_id)
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
+# class BodyPostMedical(viewsets.ViewSet):
+#     def postmedical(self, request):
+#         try:
+#             authorization_header = request.META.get('HTTP_AUTHORIZATION')
+#             if authorization_header:
+#                 parts=authorization_header.split()
+#                 if len(parts)==2 and parts[0].lower()=='bearer':
+#                     token = parts[1]
+#                     user_id = decode_session_data(token)
+#                     user_account = account.objects.get(id=user_id)
 
-                    medical = request.data.get('medical')
-                    recordet_at = request.data.get('recordet_at')
+#                     medical = request.data.get('medical')
+#                     recordet_at = request.data.get('recordet_at')
 
-                    medical = Medical(user=user_account,
-                              medical=medical,
-                              recordet_at=recordet_at,
-                              created_at=timezone.now(),
-                              updated_at=timezone.now()
-                              )
-                    medical.save()
-                    return Response({'status':0,'message':'成功'})
-                return Response({'status':1,'message':'失敗'})
-        except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+#                     medical = Medical(user=user_account,
+#                               medical=medical,
+#                               recordet_at=recordet_at,
+#                               created_at=timezone.now(),
+#                               updated_at=timezone.now()
+#                               )
+#                     medical.save()
+#                     return Response({'status':"0",'message':'成功'})
+#                 return Response({'status':"1",'message':'失敗'})
+#         except Exception as e:
+#             return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
 
 
 class BodyGetDrugUsed(viewsets.ViewSet):
@@ -478,9 +499,9 @@ class BodyGetDrugUsed(viewsets.ViewSet):
                     user_account = account.objects.get(id=user_id)
                     drug_used = Drug_Used.objects.filter(user=user_account)
                     serializer = BodyDrugUsedSerializer(drug_used, many=True)
-                    return Response({'status':0,'message':'成功','drug_used':serializer.data})
+                    return Response({'status':"0",'message':'成功','drug_used':serializer.data})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
 
 class BodyPostDrugUsed(viewsets.ViewSet):
@@ -504,10 +525,10 @@ class BodyPostDrugUsed(viewsets.ViewSet):
                               updated_at=timezone.now()
                               )
                     drug_used.save()
-                    return Response({'status':0,'message':'成功'})
-                return Response({'status':1,'message':'失敗'})
+                    return Response({'status':"0",'message':'成功'})
+                return Response({'status':"1",'message':'失敗'})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
 class BodyDelDrugUsed(viewsets.ViewSet):
     def deldrugused(self, request):
@@ -521,30 +542,34 @@ class BodyDelDrugUsed(viewsets.ViewSet):
                     user_account = account.objects.get(id=user_id)
                     drug_used = Drug_Used.objects.filter(user=user_account)
                     drug_used.delete()
-                    return Response({'status':0,'message':'成功'})
-                return Response({'status':1,'message':'失敗'})
+                    return Response({'status':"0",'message':'成功'})
+                return Response({'status':"1",'message':'失敗'})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
 
-class BodyGetCare(viewsets.ViewSet):
+class BodyCare(viewsets.ViewSet):
     def getcare(self, request):
         try:
-            authorization_header = request.META.get('HTTP_AUTHORIZATION')
-            if authorization_header:
-                parts = authorization_header.split()
-                if len(parts)==2 and parts[0].lower()=='bearer':
-                    token = parts[1]
-                    user_id = decode_session_data(token)
-                    # user_account = account.objects.get(id=user_id)
-                    care = Care.objects.filter(user=user_id)
-                    serializer = BodyCareSerializer(care, many=True)
-                    return Response({'status':0,'message':'成功','care':serializer.data})
+            user_account = account.objects.get(id=get_token(request))
+            care = Care.objects.filter(user=user_account)
+            # serializer = BodyCareSerializer(care, many=True)
+            response = []
+            for c in care:
+                care_data = {
+                    "id": user_account.id,
+                    "user_id": user_account.id,
+                    "member_id": c.member_id,
+                    "reply_id": c.reply_id,
+                    "message": c.message,
+                    "created_at": c.created_at,
+                    "updated_at": c.updated_at
+                }
+                response.append(care_data)
+            return Response({'status':"0",'message':'成功','cares':response})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
-
-class BodyPostCare(viewsets.ViewSet):
     def postcare(self, request):
         try:
             authorization_header = request.META.get('HTTP_AUTHORIZATION')
@@ -565,10 +590,10 @@ class BodyPostCare(viewsets.ViewSet):
                                 updated_at=timezone.now()
                                 )
                     care.save()
-                    return Response({'status':0,'message':'成功'})
-                return Response({'status':1,'message':'失敗'})
+                    return Response({'status':"0",'message':'成功'})
+                return Response({'status':"1",'message':'失敗'})
         except Exception as e:
-            return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
 
         
