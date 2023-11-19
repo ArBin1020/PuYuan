@@ -177,7 +177,7 @@ class Medical(models.Model):
     diabets_type = models.IntegerField(default=1)
     oad = models.IntegerField(default=1)
     insulin = models.IntegerField(default=1)
-    antu_hypertensive = models.IntegerField(default=1)
+    anti_hypertensive = models.IntegerField(default=1)
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 

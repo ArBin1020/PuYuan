@@ -439,6 +439,7 @@ class BodyGetMedical(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':1,'message':f'失敗 - {str(e)}'}, status=400)
+        
 class BodyPostMedical(viewsets.ViewSet):
     def postmedical(self, request):
         try:
