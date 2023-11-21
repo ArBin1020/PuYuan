@@ -21,10 +21,14 @@ urlpatterns = [
     path('api/user/a1c',BodyA1c.as_view({'post':'postA1c','get':'getA1c','delete':'delA1c'}),name='bodya1c'),
     path('api/user/weight',BodyWeight.as_view({'post':'weight'}),name='bodyweight'),
     path('api/user/blood/sugar',BodyBloodSuger.as_view({'post':'bloodsuger'}),name='bodysugar'),
+    path('api/user/records',Records.as_view({'post':'post_records'}),name='bodyrecords'),
 
     #05 就醫資訊
     path('api/user/medical',BodyGetMedical.as_view({'get':'getmedical','patch':'patchmedical'}),name='bodymedical'),
 
     #07 關懷資訊
     path('api/user/care',BodyCare.as_view({'get':'getcare','post':'postcare'}),name='bodycare'),
+
+    #08 其他
+    path('api/user/badge',Body_Badge.as_view({'put':'put_badge'}),name='bodybadge'),
 ]

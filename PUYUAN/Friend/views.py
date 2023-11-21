@@ -12,15 +12,29 @@ class Friend_Get_Code(viewsets.ViewSet):
         try:
             user_id = get_token(request)
             invite = Invite.objects.get(user_id=user_id)
-            return Response({'status': 0, 'message': '成功', 'invite_code': invite.code})
+            return Response({'status': "0", 'message': '成功', 'invite_code': invite.code})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
 
 class Friend_Get_List(viewsets.ViewSet):
     def get_list(self, request):
-        user_id = get_token(request)
-        friend_list = Friend.objects.filter(user_id=user_id, status=1).only('friend','data_type')
-        print(friend_list)
+        try:
+            user_id = get_token(request)
+            friend_list = Friend.objects.filter(user_id=user_id, status=1).only('friend','data_type')
+            response = []
+            for f in friend_list:
+                friend = account.objects.get(id=f.friend_id)
+                response.append({
+                    'id': 1,
+                    'name': "friend.name",
+                    # 'account': friend.account,
+                    # 'type': f.data_type,
+                    'relation_type': 1
+                })
+            return Response({'status': "0", 'message': '成功', 'friends': response})
+        except Exception as e:
+            print(e)
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'},status=400)
         # if friend_list:
 
 
@@ -46,9 +60,9 @@ class Friend_Get_Request(viewsets.ViewSet):
                         'account': 'fb_2'
                     }
                 })
-            return Response({'status': 0, 'message': '成功', 'requests': response})
+            return Response({'status': "0", 'message': '成功', 'requests': response})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
         
 class Friend_Send(viewsets.ViewSet):
     def send(self, request):
@@ -56,7 +70,7 @@ class Friend_Send(viewsets.ViewSet):
             user_id = get_token(request)
 
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
         
 
 

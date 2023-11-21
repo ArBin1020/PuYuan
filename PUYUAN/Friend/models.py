@@ -1,6 +1,7 @@
 from django.db import models
 from User.models import account
 # Create your models here.
+
 class Friend(models.Model):
     user = models.ForeignKey(account, on_delete=models.CASCADE, related_name='user')
     friend = models.ForeignKey(account, on_delete=models.CASCADE, related_name='friend', null=True)
@@ -9,11 +10,12 @@ class Friend(models.Model):
     status = models.IntegerField(default=0)
     read = models.IntegerField(default=0)
     # code = models.CharField(max_length=100, unique=True, default='0')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.CharField(max_length=50,default='0')
+    updated_at = models.CharField(max_length=50,default='0')
     
     def __str__(self):
         return self.id
+    
     class Meta:
         db_table = 'Friend'
 
