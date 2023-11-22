@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
-from django.db.models.fields import DateTimeField
 from django.db.models.fields.related import ForeignKey
 class account(AbstractUser):
 
@@ -21,13 +20,13 @@ class account(AbstractUser):
     
 class news(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
-    member_id  = models.IntegerField()
-    group = models.IntegerField()
-    title = models.CharField(max_length=50)
-    message = models.CharField(max_length=50)
-    pushed_at = DateTimeField()
-    created_at = DateTimeField()
-    updated_at = DateTimeField()
+    member_id  = models.IntegerField(default=0)
+    group = models.IntegerField(default=0)
+    title = models.CharField(max_length=50,default='0')
+    message = models.CharField(max_length=50,default='0')
+    pushed_at = models.CharField(max_length=50,default='0')
+    created_at = models.CharField(max_length=50,default='0')
+    updated_at = models.CharField(max_length=50,default='0')
     
     class Meta:
         db_table = 'User_News'

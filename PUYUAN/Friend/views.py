@@ -2,8 +2,10 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .models import *
 from utils import *
-from User.models import account
+from User.models import *
+from Body.models import *
 from rest_framework.response import Response
+from django.utils import timezone
 # Create your views here.
 
 
@@ -12,15 +14,27 @@ class Friend_Get_Code(viewsets.ViewSet):
         try:
             user_id = get_token(request)
             invite = Invite.objects.get(user_id=user_id)
-            return Response({'status': 0, 'message': '成功', 'invite_code': invite.code})
+            return Response({'status': "0", 'message': '成功', 'invite_code': invite.code})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
 
 class Friend_Get_List(viewsets.ViewSet):
     def get_list(self, request):
-        user_id = get_token(request)
-        friend_list = Friend.objects.filter(user_id=user_id, status=1).only('friend','data_type')
-        print(friend_list)
+        try:
+            user_id = get_token(request)
+            friend_list = Friend.objects.filter(user_id=user_id, status=1).only('friend','data_type')
+            response = []
+            for f in friend_list:
+                friend = account.objects.get(id=f.friend_id)
+                response.append({
+                    'id': 1,
+                    'name': "friend.name",
+                    'relation_type': 1
+                })
+            return Response({'status': "0", 'message': '成功', 'friends': response})
+        except Exception as e:
+            print(e)
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'},status=400)
         # if friend_list:
 
 
@@ -46,17 +60,32 @@ class Friend_Get_Request(viewsets.ViewSet):
                         'account': 'fb_2'
                     }
                 })
-            return Response({'status': 0, 'message': '成功', 'requests': response})
+            return Response({'status': "0", 'message': '成功', 'requests': response})
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
         
 class Friend_Send(viewsets.ViewSet):
     def send(self, request):
         try:
-            user_id = get_token(request)
+            user_account = account.objects.get(id=get_token(request))
 
+            data_type = request.data.get('type')
+            invite_code = request.data.get('invite_code')
+
+            user = UserProfile.objects.get(invite_code=invite_code)
+
+            Friend.objects.create(
+                user_id=user_account.id,
+                friend_id=user.id,
+                data_type=data_type,
+                status=0,
+                read=0,
+                created_at=timezone.now(),
+                updated_at=timezone.now()
+            )
+            return Response({'status': "0", 'message': '成功'}) 
         except Exception as e:
-            return Response({'status': 1, 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
         
 
 
