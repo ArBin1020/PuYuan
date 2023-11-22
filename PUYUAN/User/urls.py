@@ -11,6 +11,6 @@ urlpatterns = [
     path('api/password/reset', accountResetPassword.as_view({ 'post': 'reset'}), name='account-reset'),
     
     path('api/news', Othernews.as_view({'get': 'news'}), name='get-news'),
-    path('api/share', OtherShare.as_view({'post': 'share','get':'ViewShare'}), name='share'),
-    # path('api/share',OtherShare.as_view({'get': 'ViewShare'}), name='viewshare')
+    path('api/share', OtherShare.as_view({'post': 'share'}), name='share'),
+    path('api/share/<int:relation_type>',OtherShare.as_view({'get': 'ViewShare'}), name='viewshare')
 ]

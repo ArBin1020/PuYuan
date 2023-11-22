@@ -37,7 +37,7 @@ class accountRegister(viewsets.ViewSet):
                 
         except Exception as e:
             print(e)
-            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
         
 # complete
 class accountLogin(viewsets.ViewSet):
@@ -58,7 +58,7 @@ class accountLogin(viewsets.ViewSet):
             else:
                 return Response({'status': "1", 'message': '電子郵件或密碼錯誤', 'token': ""})
         except Exception as e:
-            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
 
 # complete
 class accountSendCode(viewsets.ViewSet):
@@ -68,7 +68,8 @@ class accountSendCode(viewsets.ViewSet):
             existing_account = account.objects.filter(email=email).first()
 
             if existing_account:
-                code = ''.join(random.choice(string.ascii_letters) for _ in range(5))
+                code = ''.join(random.choice(string.ascii_uppercase) for _ in range(5))
+                print(code)
                 subject = 'PUYUAN 驗證碼'
                 content = f'您的驗證碼為:{code}'
                 send_email(subject, email, content)
@@ -77,7 +78,7 @@ class accountSendCode(viewsets.ViewSet):
                 return Response({'status': "0", 'message': '成功'})
             return Response({'status': "1", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
 
 # complete
 class accountCheckCode(viewsets.ViewSet):
@@ -95,7 +96,7 @@ class accountCheckCode(viewsets.ViewSet):
                     return Response({'status': "1", 'message': '驗證碼錯誤'})
             return Response({'status': "0", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
 
 # complete
 class accountForget(viewsets.ViewSet):
@@ -112,7 +113,7 @@ class accountForget(viewsets.ViewSet):
                 return Response({'status': "0", 'message': '成功'})
             return Response({'status': "1", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
 
 # complete
 class accountResetPassword(viewsets.ViewSet):
@@ -142,17 +143,31 @@ class accountRegisterCheck(viewsets.ViewSet):
                 return Response({'status': "1", 'message': '失敗'})
             return Response({'status': "0", 'message': '成功'})
         except Exception as e:
-            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
         
 # complete
 class Othernews(viewsets.ViewSet):
     def news(self, request):
         try:
+
             latest_news = news.objects.filter(user=get_token(request)).latest('created_at', 'pushed_at', 'updated_at')
-            serializer = OtherSerializer(latest_news)
-            return Response({'status': "0", 'message': '成功', 'news': serializer.data})
+            print(latest_news)
+
+            response = {
+                "id": latest_news.id,
+                "member_id": latest_news.member_id,
+                "group": latest_news.group,
+                "title": latest_news.title,
+                "message": latest_news.message,
+                "pushed_at": latest_news.pushed_at,
+                "created_at": latest_news.created_at,
+                "updated_at": latest_news.updated_at
+            }
+
+            return Response({'status': "0", 'message': '成功', 'news': [response]})
         except Exception as e:
-            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
+            print(e)
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
 
 
 class OtherShare(viewsets.ViewSet):
@@ -170,15 +185,56 @@ class OtherShare(viewsets.ViewSet):
         except account.DoesNotExist:
             return Response({'status': "1", 'message': '失敗'})
         except Exception as e:
-            return Response({'status': "1", 'message': f'分享失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'分享失敗 - {str(e)}'}, status=400)
 
-    def ViewShare(self, request):
+    def ViewShare(self, request,relation_type):
         try:
             user_id = get_token(request)
-            # data_type = request.data.get('type')
-            # shares = share.objects.filter(user=user_id,data_type=data_type)
-            shares = share.objects.filter(user=user_id)
-            serializer = ShareSerializer(shares, many=True) 
-            return Response({'status': "0", 'message': '成功', 'records': serializer.data})
+            shares = share.objects.filter(user=user_id, relation_type=relation_type)
+            data = {
+                "id": "1,"
+            }
+            # data = []
+            # for share_check in shares:
+            #     if share_check.data_type == 0:
+            #         bloodpressure = BloodPressure.objects.filter(user=user_id)
+            #         r = {
+            #                 "id": user_id,
+            #                 "user_id": user_id,
+            #                 "weight": float(bloodpressure.weight),
+            #                 "body_fat": float(bloodpressure.body_fat),
+            #                 "bmi": float(bloodpressure.bmi),
+            #                 "recorded_at": recorded_at,
+            #                 "created_at": created_at,
+            #                 "type": 1,
+            #                 "user": {
+            #                     "id": user_pro.UUID,
+            #                     "name": user.name,
+            #                     "account": user.email,
+            #                     "email": user.email,
+            #                     "phone": user.phone,
+            #                     "fb_id": user_pro.fb_id,
+            #                     "status": user.status,
+            #                     "group": user.group,
+            #                     "birthday": user.birthday,
+            #                     "height": user.height,
+            #                     "gender": user.gender,
+            #                     "verified": user.verified,
+            #                     "privacy_policy": user.privacy_policy,
+            #                     "must_change_password": user.must_change_password,
+            #                     "badge": user.badge,
+            #                     "created_at": created_at_userfile,
+            #                     "updated_at": updated_at_userfile
+            #                 }
+            #             }
+            #     elif share_check.data_type == 1:
+            #         data.append(share_check)
+            #     elif share_check.data_type == 2:
+            #         data.append(share_check)
+            #     elif share_check.data_type == 3:
+            #         data.append(share_check)
+            
+            return Response({'status': "0", 'message': '成功', 'records': []})
         except Exception as e:
-            return Response({'status': "1", 'message': f'失敗 - {str(e)})'})
+            print(e)
+            return Response({'status': "1", 'message': f'失敗 - {str(e)})'}, status=400)

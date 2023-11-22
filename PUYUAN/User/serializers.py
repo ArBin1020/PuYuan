@@ -22,9 +22,12 @@ class OtherSerializer(serializers.ModelSerializer):
     class Meta:
         model = news
         fields = '__all__'
+        read_only_fields = ['id', 'member_id', 'group', 'pushed_at', 'created_at', 'updated_at']
 
 
 class ShareSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = share
         fields = '__all__'
+        

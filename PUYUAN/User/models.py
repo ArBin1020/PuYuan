@@ -36,6 +36,10 @@ class news(models.Model):
 
 class share(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
+    member_id = models.IntegerField()
+    title = models.CharField(max_length=50)
+    message = models.CharField(max_length=50)
+    
     data_type = models.IntegerField() # 0:血壓 1:體重 2:血糖 3:飲食
     relation_type = models.IntegerField() # 1:親友 2:糖友
     # share_id = models.IntegerField()

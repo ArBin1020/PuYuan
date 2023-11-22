@@ -174,21 +174,18 @@ class A1c(models.Model):
 
 class Medical(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
-    diabets_type = models.IntegerField(default=1)
+    diabetes_type = models.IntegerField(default=1)
     oad = models.IntegerField(default=1)
     insulin = models.IntegerField(default=1)
-    anti_hypertensive = models.IntegerField(default=1)
+    anti_hypertensives = models.IntegerField(default=1)
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.id
+    # def __str__(self):
+    #     return self.id
     
     class Meta:
         db_table = 'Body_Medical'
-        verbose_name = '病史'
-        verbose_name_plural = '病史'
-
 
 class Drug_Used(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
