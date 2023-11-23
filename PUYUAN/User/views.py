@@ -26,13 +26,12 @@ class accountRegister(viewsets.ViewSet):
                 user.save()
                 Invite.objects.create(user=user, invite_code=random.randint(100000, 999999))
                 user_id = account.objects.filter(email=email).first().id
-                print(user_id)
                 UserProfile.objects.create(user_id=user_id, name="USER_"+str(user_id), invite_code=random.randint(100000, 999999))
                 UserDefault.objects.create(user_id=user_id)
                 UserSetting.objects.create(user_id=user_id)
                 vip.objects.create(user_id=user_id)
                 Medical.objects.create(user_id=user_id)
-                Friend.objects.create(user_id=user_id, friend_id=user_id, relation_id=1, data_type=1, status=1, read=1)
+                Friend.objects.create(user_id=user_id, relation_id=1, data_type=1, status=1, read=1)
                 news.objects.create(user_id=user_id,pushed_at="2020-01-01 00:00:00",created_at="2020-01-01 00:00:00",updated_at="2020-01-01 00:00:00")
                 return Response({'status': "0", 'message': '成功'})
             return Response({'status': "1", 'message': '失敗 - {}'.format(serializer.errors)})
@@ -153,8 +152,6 @@ class Othernews(viewsets.ViewSet):
         try:
 
             latest_news = news.objects.filter(user=get_token(request)).latest('created_at', 'pushed_at', 'updated_at')
-            print(latest_news)
-
             response = {
                 "id": latest_news.id,
                 "member_id": latest_news.member_id,
@@ -165,7 +162,7 @@ class Othernews(viewsets.ViewSet):
                 "created_at": latest_news.created_at,
                 "updated_at": latest_news.updated_at
             }
-            print(response)
+
             return Response({'status': "0", 'message': '成功', 'news': [response]})
         except Exception as e:
             print(e)

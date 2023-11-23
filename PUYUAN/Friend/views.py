@@ -22,15 +22,16 @@ class Friend_Get_List(viewsets.ViewSet):
     def get_list(self, request):
         try:
             user_id = get_token(request)
-            friend_list = Friend.objects.filter(user_id=user_id, status=1).only('friend','data_type')
+            friend_list = Friend.objects.filter(user_id=user_id, status=1).only('data_type')
             response = []
             for f in friend_list:
-                friend = account.objects.get(id=f.friend_id)
+                # friend = account.objects.get(id=f.friend_id)
                 response.append({
                     'id': 1,
                     'name': "friend.name",
                     'relation_type': 1
                 })
+            print(response)
             return Response({'status': "0", 'message': '成功', 'friends': response})
         except Exception as e:
             print(e)
