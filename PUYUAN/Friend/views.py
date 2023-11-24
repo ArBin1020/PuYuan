@@ -14,10 +14,10 @@ class Friend_Get_Code(viewsets.ViewSet):
         try:
             user_id = get_token(request)
             invite = Invite.objects.get(user_id=user_id)
-            print(invite.code)
-            return Response({'status': "0", 'message': '成功', 'invite_code': invite.code})
+            print(invite.invite_code)
+            return Response({'status': "0", 'message': '成功', 'invite_code': invite.invite_code})
         except Exception as e:
-            return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'},status=400)
 
 class Friend_Get_List(viewsets.ViewSet):
     def get_list(self, request):
@@ -125,10 +125,29 @@ class Friend_Remove(viewsets.ViewSet):
 
 class Friend_Get_Results(viewsets.ViewSet):
     def get_results(self, request):
-        authorization_header = request.META.get('HTTP_AUTHORIZATION')
-        if authorization_header:
-            parts = authorization_header.split()
-            if len(parts) == 2 and parts[0].lower() == 'bearer':
-                token = parts[1]
-                user_id = decode_session_data(token)
-                user_account = account.objects.get(id=user_id)
+        try:
+            user_account = account.objects.get(user_id=get_token(request))
+            friend = Friend.objects.filter(user_id=user_account.id)
+            response = []
+            if friend:
+                for f in friend:
+                    response.append({
+                        'id': f.id,
+                        'user_id': user_account.id,
+                        'relation_id': f.relation_id,
+                        'type': f.data_type,
+                        'status': f.status,
+                        'read': f.read,
+                        'created_at': f.created_at,
+                        'updated_at': f.updated_at,
+                        'relation' : {
+                            'id' : 2,
+                            'name': '',
+                            'account': 'fb_2'
+                        }
+                    })
+            print(response)
+            return Response({'status': "0", 'message': '成功', 'results': response})
+        except Exception as e:
+            print(e)
+            return Response({'status': "1", 'message': f'失敗 - {str(e)}'},status=400)
