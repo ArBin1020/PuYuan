@@ -33,8 +33,7 @@ class UserDefault(models.Model):
     created_at = models.CharField(max_length=50,default='0')
     updated_at = models.CharField(max_length=50,default='0')
 
-    def __str__(self):
-        return self.id
+
     
     class Meta:
         db_table = 'Body_User_Default'
@@ -51,8 +50,7 @@ class UserSetting(models.Model):
 
     created_at = models.CharField(max_length=50,default='0')
     updated_at = models.CharField(max_length=50,default='0')
-    def __str__(self):
-        return self.id
+
     class Meta:
         db_table = 'Body_User_Setting'
         verbose_name = '使用者設定'
@@ -94,8 +92,7 @@ class UserProfile(models.Model):
     created_at = models.CharField(max_length=50,default='0')
     updated_at = models.CharField(max_length=50,default='0')
 
-    def __str__(self):
-        return self.name
+    
     class Meta:
         db_table = 'Body_User_Profile'
 
@@ -106,8 +103,7 @@ class BloodPressure(models.Model):
     pulse = models.IntegerField(default=1)
     recorded_at = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.id
+
     class Meta:
         db_table = 'Body_Blood_Pressure'
         verbose_name = '血壓'
@@ -120,21 +116,19 @@ class Weight(models.Model):
     bmi = models.FloatField()
     recorded_at = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.id
+
     
     class Meta:
         db_table = 'Body_Weight'
 class BloodSuger(models.Model):
     user = ForeignKey(account, on_delete=models.CASCADE)
-    sugar = models.FloatField()
+    sugar = models.IntegerField()
     timeperiod = models.IntegerField()
     recorded_at = models.CharField(max_length=50)
     drug = models.IntegerField()
     exercise = models.IntegerField()
 
-    def __str__(self):
-        return self.id
+
     
     class Meta:
         db_table = 'Body_Blood_Suger'
@@ -149,8 +143,6 @@ class Diet(models.Model):
     lng = models.FloatField()
     recorded_at = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.id
     
     class Meta:
         db_table = 'Body_Diet'
@@ -163,8 +155,6 @@ class A1c(models.Model):
     created_at = models.CharField(max_length=50,default='0')
     updated_at = models.CharField(max_length=50,default='0')
 
-    def __str__(self):
-        return self.id
     
     class Meta:
         db_table = 'Body_A1c'
@@ -180,8 +170,6 @@ class Medical(models.Model):
     created_at = models.CharField(max_length=50,default='0')
     updated_at = models.CharField(max_length=50,default='0')
 
-    # def __str__(self):
-    #     return self.id
     
     class Meta:
         db_table = 'Body_Medical'
@@ -194,8 +182,7 @@ class Drug_Used(models.Model):
     updated_at = models.CharField(max_length=50,default='0')
     created_at = models.CharField(max_length=50,default='0')
 
-    def __str__(self):
-        return self.id
+
     
     class Meta:
         db_table = 'Body_Drug_Used'
@@ -210,8 +197,7 @@ class Care(models.Model):
     created_at = models.CharField(max_length=50,default='0')
     updated_at = models.CharField(max_length=50,default='0')
 
-    def __str__(self):
-        return self.id
+
     
     class Meta:
         db_table = 'Body_Care'

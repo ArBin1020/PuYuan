@@ -12,8 +12,7 @@ class Friend(models.Model):
     created_at = models.CharField(max_length=50,default='0')
     updated_at = models.CharField(max_length=50,default='0')
     
-    def __str__(self):
-        return self.id
+
     
     class Meta:
         db_table = 'Friend'

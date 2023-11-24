@@ -13,7 +13,7 @@ urlpatterns = [
     path('api/user/blood/sugar',BodyBloodSuger.as_view({'post':'bloodsuger'}),name='bodysugar'),
 
     #03 日記
-    path("api/user/diary",BodyGetDiet.as_view({'get':'getdiet'}),name="bodygetdiet"),
+    path("api/user/diary",BodyGetDiet.as_view({'get':'list'}),name="bodygetdiet"),
     path('api/user/diet',BodyDiet.as_view({'post':'diet'}),name='bodydiet'),
 
 
@@ -21,7 +21,7 @@ urlpatterns = [
     path('api/user/a1c',BodyA1c.as_view({'post':'postA1c','get':'getA1c','delete':'delA1c'}),name='bodya1c'),
     path('api/user/weight',BodyWeight.as_view({'post':'weight'}),name='bodyweight'),
     path('api/user/blood/sugar',BodyBloodSuger.as_view({'post':'bloodsuger'}),name='bodysugar'),
-    path('api/user/records',Records.as_view({'post':'post_records'}),name='bodyrecords'),
+    path('api/user/records',Records.as_view({'post':'post_records','delete':'delete_records'}),name='bodyrecords'),
     
     #05 就醫資訊
     path('api/user/medical',BodyGetMedical.as_view({'get':'getmedical','patch':'patchmedical'}),name='bodymedical'),

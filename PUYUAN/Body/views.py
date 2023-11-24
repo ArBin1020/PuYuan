@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 # Create your views here.
 from .models import *
-from .serializers import *
+
 from utils import *
 from User.models import account
 from django.utils import timezone
@@ -11,30 +11,49 @@ from django.db import transaction
 
 from User.models import account
 
+DEFAULT_DIARY_DICT = {
+    "id": 0,
+    "user_id": 0,
+    "systolic": 0,
+    "diastolic": 0,
+    "pulse": 0,
+    "weight": 0.0,
+    "body_fat": 0.0,
+    "bmi": 0.0,
+    "sugar": 0.0,
+    "exercise": 0,
+    "drug": 0,
+    "timeperiod": 0,
+    "description": "",
+    "meal": 0,
+    "tag": [{"name": [], "message": ""}],  # name: list[str]
+    "image": ["http://www.example.com"],
+    "location": {"lat": "", "lng": ""},
+    "reply": "",
+    "recorded_at": "",
+    "type": "",
+}
+
 class BodyUserProfile(viewsets.ViewSet):
     # complete
     def setprofile(self, request):
         try:
             user_account = account.objects.get(id=get_token(request))
-            if UserProfile.objects.filter(user=user_account):
-                user_profile = UserProfile.objects.get(user=user_account)
-                # user_profile.delete()
-                if request.data.get('name') != '':
-                    
-                    user_profile = UserProfile(user=user_account,
-                                               name = request.data.get('name'),
-                                               birthday = request.data.get('birthday'),
-                                               height = request.data.get('height'),
-                                               weight = request.data.get('weight'),
-                                               phone = request.data.get('phone'),
-                                               email = request.data.get('email'),
-                                               gender = request.data.get('gender'),
-                                               fcm_id = request.data.get('fcm_id'),
-                                               address = request.data.get('address')
-                                               )
-                    user_profile.save()
+            user_profile, created = UserProfile.objects.get_or_create(user_id=user_account)
+            if not created:
+                    if request.data.get('name'):
+                        user_profile.name = request.data.get('name')
+                        user_profile.birthday = request.data.get('birthday')
+                        user_profile.height = request.data.get('height')
+                        user_profile.weight = request.data.get('weight')
+                        user_profile.phone = request.data.get('phone')
+                        user_profile.email = request.data.get('email')
+                        user_profile.gender = request.data.get('gender')
+                        user_profile.fcm_id = request.data.get('fcm_id')
+                        user_profile.address = request.data.get('address')
+                        user_profile.save()
             else:
-                user_profile = UserProfile(user=user_account)
+                user_profile = UserProfile(user_id=user_account)
                 user_profile.save()
             return Response({'status': "0", 'message': '成功'})
         except Exception as e:
@@ -47,6 +66,7 @@ class BodyUserProfile(viewsets.ViewSet):
             # print(account.objects.get(id=get_token(request)))
         try:
             user_profile = UserProfile.objects.get(user_id=user_id)
+            print(user_profile)
             # unread_records = unread_records.objects.get(user_id=1)
             default = UserDefault.objects.get(user_id=user_id)
             setting = UserSetting.objects.get(user_id=user_id)
@@ -66,7 +86,7 @@ class BodyUserProfile(viewsets.ViewSet):
         response = {
                 "id" : user_id,
                 "name" : user_profile.name,
-                "account" : user_account.username,
+                "account" : user_account.email,
                 "email" : user_profile.email,
                 "phone" : user_profile.phone,
                 "fb_id" : "未設置",
@@ -139,6 +159,7 @@ class BodyUserProfile(viewsets.ViewSet):
                     "updated_at" : user_vip.updated_at
                 }
             }
+        # print(response)
         return Response({'status': "0", 'message': '成功', 'user': response})
 
 # complete
@@ -163,23 +184,25 @@ class BodyUserSetting(viewsets.ViewSet):
     def usersetting(self, request):
         try:
             user_account = account.objects.get(id=get_token(request))
-            try:
-                user_setting = UserSetting.objects.get(user=user_account)
-                user_setting.delete()
-            except UserSetting.DoesNotExist:
-                pass
-            user_setting = UserSetting(user=user_account,
-                                       after_recording=request.data.get('after_recording'),
-                                       no_recording_for_a_day=request.data.get('no_recording_for_a_day'),
-                                       over_max_or_under_min=request.data.get('over_max_or_under_min'),
-                                       after_meal=request.data.get('after_meal'),
-                                       unit_of_sugar=request.data.get('unit_of_sugar'),
-                                       unit_of_weight=request.data.get('unit_of_weight'),
-                                       unit_of_height=request.data.get('unit_of_height')
-                                    )
-            user_setting.save()
+            user_setting, created = UserProfile.objects.get_or_create(user_id=user_account)
+
+            if not created:
+                    user_setting.after_recording = request.data.get('after_recording')
+                    print(request.data.get('after_recording'))
+                    user_setting.no_recording_for_a_day = request.data.get('no_recording_for_a_day')
+                    user_setting.over_max_or_under_min = request.data.get('over_max_or_under_min')
+                    user_setting.after_meal = request.data.get('after_meal')
+                    user_setting.unit_of_sugar = request.data.get('unit_of_sugar')
+                    user_setting.unit_of_weight = request.data.get('unit_of_weight')
+                    user_setting.unit_of_height = request.data.get('unit_of_height')
+                    user_setting.updated_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+                    user_setting.save()
+            else:
+                user_setting = UserSetting(user_id=user_account)
+                user_setting.save()
             return Response({'status': "0", 'message': '成功'})
         except Exception as e:
+            print(e)
             return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
 
 # complete      
@@ -290,59 +313,129 @@ class Records(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
-    # def delete_records(self, request):
-    #     try:
-    #         if request.data.get()
-    #         user_account = account.objects.get(id=get_token(request))
-    #         bloodsuger = BloodSuger.objects.filter(user=user_account)
-    #         bloodsuger.delete()
-    #         bloodpressures = BloodPressure.objects.filter(user=user_account)
-    #         bloodpressures.delete()
-    #         weights = Weight.objects.filter(user=user_account)
-    #         weights.delete()
-    #         return Response({'status':"0",'message':'成功'})
-    #     except Exception as e:
-    #         return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
-class BodyGetDiet(viewsets.ViewSet):
-    def getdiet(self, request):
+    def delete_records(self, request):
         try:
+            del_object = request.data['deleteObject']
+            user_account = account.objects.get(id=get_token(request))
+            print(del_object)
+            blood_pressure_to_delete = del_object.get("blood_pressures", [])
+            weight_to_delete = del_object.get("weights", [])
+            blood_sugar_to_delete = del_object.get("blood_sugars", [])
+            diets_to_delete = del_object.get("diets", [])
+            print(blood_pressure_to_delete)
+            BloodSuger.objects.filter(id__in=blood_sugar_to_delete, user_id=user_account).delete()
+            BloodPressure.objects.filter(id__in=blood_pressure_to_delete, user_id=user_account).delete()
+            Weight.objects.filter(id__in=weight_to_delete, user_id=user_account).delete()
+            Diet.objects.filter(id__in=diets_to_delete, user_id=user_account).delete()
+            return Response({'status':"0",'message':'成功'})
+        except Exception as e:
+            return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
+    
+class BodyGetDiet(viewsets.ViewSet):
+    def list(self, request):
+        try:
+            print(request.method)
             user_id = get_token(request)
-            bloodpressures = BloodPressure.objects.filter(user_id=user_id)
-            weights = Weight.objects.filter(user_id=user_id)
-            bloodsugers = BloodSuger.objects.filter(user_id=user_id)
-            diets = Diet.objects.filter(user_id=user_id)
-
+            date_time = request.query_params["date"]
+            # bloodpressures = BloodPressure.objects.filter(user_id=user_id)
+            # weights = Weight.objects.filter(user_id=user_id)
+            # bloodsugers = BloodSuger.objects.filter(user_id=user_id)
+            # diets = Diet.objects.filter(user_id=user_id, recorded_at__startswith=date_time)
+            # print(diets.meal)
+            
             response = []
-            for bloodpressure, weight, bloodsuger, diet in zip(bloodpressures, weights, bloodsugers, diets):
-                diet_data = {
-                    "id": user_id,
-                    "user_id": user_id,
-                    "systolic": bloodpressure.systolic,
-                    "diastolic": bloodpressure.diastolic,
-                    "pulse": bloodpressure.pulse,
-                    "weight": weight.weight,
-                    "body_fat": weight.body_fat,
-                    "bmi": weight.bmi,
-                    "sugar": bloodsuger.sugar,
-                    "execrise": bloodsuger.execrise,
-                    "drug": bloodsuger.drug,
-                    "timeperiod": bloodsuger.timeperiod,
-                    "description": diet.description,
-                    "meal": diet.meal,
-                    "tag": diets.tag.split(','),
-                    "image": diet.image,
-                    "location": {
-                        "lat": diet.lat,
-                        "lng": diet.lng
-                    },
-                    "reply": "",
-                    "recorded_at": diet.recorded_at,
-                    "type": "blood_pressure",
-                }
+
+            print('tmp')
+            if BloodPressure.objects.filter(user_id=user_id):
+                for bloodpressure in BloodPressure.objects.filter(user_id=user_id, recorded_at__startswith=date_time):
+                    bloodpressure_data = DEFAULT_DIARY_DICT.copy()
+                    bloodpressure_data.update(
+                        user_id=user_id,
+                        systolic=bloodpressure.systolic,
+                        diastolic=bloodpressure.diastolic,
+                        pulse=bloodpressure.pulse,
+                        recorded_at=bloodpressure.recorded_at,
+                        type="blood_pressure"
+                    )
+                    response.append(bloodpressure_data)
+            if Weight.objects.filter(user_id=user_id):
+                for weight in Weight.objects.filter(user_id=user_id, recorded_at__startswith=date_time):
+                    weight_data = DEFAULT_DIARY_DICT.copy()
+                    weight_data.update(
+                        user_id=user_id,
+                        weight=weight.weight,
+                        body_fat=weight.body_fat,
+                        bmi=weight.bmi,
+                        recorded_at=weight.recorded_at,
+                        type="weight"
+                    )
+                    response.append(weight_data)
+            if BloodSuger.objects.filter(user_id=user_id):
+                for bloodsuger in BloodSuger.objects.filter(user_id=user_id, recorded_at__startswith=date_time):
+                    bloodsuger_data = DEFAULT_DIARY_DICT.copy()
+                    bloodsuger_data.update(
+                        user_id=user_id,
+                        sugar=bloodsuger.sugar,
+                        exercise=bloodsuger.exercise,
+                        drug=bloodsuger.drug,
+                        timeperiod=bloodsuger.timeperiod,
+                        recorded_at=bloodsuger.recorded_at,
+                        type="blood_sugar"
+                    )
+                    response.append(bloodsuger_data)
+            if Diet.objects.filter(user_id=user_id):
+                for diet in Diet.objects.filter(user_id=user_id, recorded_at__startswith=date_time):
+                    diet_data = DEFAULT_DIARY_DICT.copy()
+                    
+                    diet_data.update(
+                        user_id=user_id,
+                        description=diet.description,
+                        meal=diet.meal,
+                        tag = [{
+                            "name": diet.tag.split(','),
+                            "message": ""
+                        }],
+                        # image=diet.image,
+                        location={
+                            "lat": str(diet.lat),
+                            "lng": str(diet.lng)
+                        },
+                            recorded_at=diet.recorded_at,
+                            type="diet"
+                        )
+                    response.append(diet_data)
+
+            # print(response)
+            # for bloodpressure, weight, bloodsuger, diet in zip(bloodpressures, weights, bloodsugers, diets):
+            #     diet_data = {
+            #         "id": user_id,
+            #         "user_id": user_id,
+            #         "systolic": bloodpressure.systolic,
+            #         "diastolic": bloodpressure.diastolic,
+            #         "pulse": bloodpressure.pulse,
+            #         "weight": weight.weight,
+            #         "body_fat": weight.body_fat,
+            #         "bmi": weight.bmi,
+            #         "sugar": bloodsuger.sugar,
+            #         "execrise": bloodsuger.execrise,
+            #         "drug": bloodsuger.drug,
+            #         "timeperiod": bloodsuger.timeperiod,
+            #         "description": diet.description,
+            #         "meal": diet.meal,
+            #         "tag": diets.tag.split(','),
+            #         "image": diet.image,
+            #         "location": {
+            #             "lat": diet.lat,
+            #             "lng": diet.lng
+            #         },
+            #         "reply": "",
+            #         "recorded_at": diet.recorded_at,
+            #         "type": "blood_pressure",
+            #     }
                 
-                response.append(diet_data)
+            #     response.append(diet_data)
                 
-            print(response)
+            # print(date_time)
             return Response({'status': "0", 'message': '成功', 'diary': response})
         except Exception as e:
             print(e)
@@ -425,8 +518,8 @@ class BodyA1c(viewsets.ViewSet):
             a1c = A1c(user=user_account,
                       a1c=data_A1c,
                       recorded_at=recorded_at,
-                      created_at=timezone.now(),
-                      updated_at=timezone.now()
+                      created_at=timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
+                      updated_at=timezone.now().strftime("%Y-%m-%d %H:%M:%S")
                       )
             a1c.save()
             return Response({'status':"0",'message':'成功'})
@@ -450,7 +543,7 @@ class BodyGetMedical(viewsets.ViewSet):
     def getmedical(self, request):
         try:
             user_account = account.objects.get(id=get_token(request))
-
+            
             medical = Medical.objects.get(user=user_account)
             response = {
                 "id" : user_account.id,
@@ -462,11 +555,12 @@ class BodyGetMedical(viewsets.ViewSet):
                 "created_at" : medical.created_at,
                 "updated_at" : medical.updated_at
             }
-            print(response)
+            print('medical'+str(response))
             return Response({'status':"0",'message':'成功','medical_info':response})
         except Medical.DoesNotExist:
             return Response({'status':"1",'message':'失敗 - 未找到醫療記錄'}, status=404)
         except Exception as e:
+            print(e)
             return Response({'status':"1",'message':f'失敗 - {str(e)}'}, status=400)
         
     def patchmedical(self, request):
@@ -520,8 +614,8 @@ class BodyDrugUsed(viewsets.ViewSet):
                                   data_type=data_type,
                                   name=name,
                                   recorded_at=recorded_at,
-                                  created_at=timezone.now(),
-                                  updated_at=timezone.now()
+                                  created_at=timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                  updated_at=timezone.now().strftime("%Y-%m-%d %H:%M:%S")
                                   )
             drug_used.save()
             return Response({'status':"0",'message':'成功'})
@@ -544,6 +638,7 @@ class BodyCare(viewsets.ViewSet):
     def getcare(self, request):
         try:
             user_account = account.objects.get(id=get_token(request))
+            # date_time = request.query_params["date"]
             care = Care.objects.filter(user=user_account)
             response = []
             for c in care:
@@ -564,14 +659,15 @@ class BodyCare(viewsets.ViewSet):
         
     def postcare(self, request):
         try:
+            time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
             user_account = account.objects.get(id=get_token(request))
             message = request.data.get('message')
             care = Care(user=user_account,
                         member_id=0,
                         reply_id=0,
                         message=message,
-                        created_at=timezone.now(),
-                        updated_at=timezone.now()
+                        created_at=time,
+                        updated_at=time,
                         )
             care.save()
             return Response({'status':"0",'message':'成功'})

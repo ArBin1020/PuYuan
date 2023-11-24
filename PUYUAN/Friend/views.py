@@ -14,6 +14,7 @@ class Friend_Get_Code(viewsets.ViewSet):
         try:
             user_id = get_token(request)
             invite = Invite.objects.get(user_id=user_id)
+            print(invite.code)
             return Response({'status': "0", 'message': '成功', 'invite_code': invite.code})
         except Exception as e:
             return Response({'status': "1", 'message': f'失敗 - {str(e)}'})
@@ -22,15 +23,16 @@ class Friend_Get_List(viewsets.ViewSet):
     def get_list(self, request):
         try:
             user_id = get_token(request)
-            friend_list = Friend.objects.filter(user_id=user_id, status=1).only('friend','data_type')
+            friend_list = Friend.objects.filter(user_id=user_id, status=1).only('data_type')
             response = []
             for f in friend_list:
-                friend = account.objects.get(id=f.friend_id)
+                # friend = account.objects.get(id=f.friend_id)
                 response.append({
                     'id': 1,
                     'name': "friend.name",
                     'relation_type': 1
                 })
+            print(response)
             return Response({'status': "0", 'message': '成功', 'friends': response})
         except Exception as e:
             print(e)
