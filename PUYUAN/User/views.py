@@ -32,7 +32,7 @@ class accountRegister(viewsets.ViewSet):
                 UserSetting.objects.create(user_id=user_id)
                 vip.objects.create(user_id=user_id)
                 Medical.objects.create(user_id=user_id)
-                Friend.objects.create(user_id=user_id, friend_id=user_id, relation_id=1, data_type=1, status=1, read=1)
+                Friend.objects.create(user_id=user_id, relation_id=1, data_type=1, status=1, read=1)
                 news.objects.create(user_id=user_id,pushed_at="2020-01-01 00:00:00",created_at="2020-01-01 00:00:00",updated_at="2020-01-01 00:00:00")
                 return Response({'status': "0", 'message': '成功'})
             return Response({'status': "1", 'message': '失敗 - {}'.format(serializer.errors)})

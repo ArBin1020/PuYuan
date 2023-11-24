@@ -8,7 +8,9 @@ from utils import *
 from User.models import account
 from django.utils import timezone
 from django.db import transaction
+
 from User.models import account
+
 class BodyUserProfile(viewsets.ViewSet):
     # complete
     def setprofile(self, request):
@@ -20,16 +22,16 @@ class BodyUserProfile(viewsets.ViewSet):
                 if request.data.get('name') != '':
                     
                     user_profile = UserProfile(user=user_account,
-                                            name = request.data.get('name'),
-                                            birthday = request.data.get('birthday'),
-                                            height = request.data.get('height'),
-                                            weight = request.data.get('weight'),
-                                            phone = request.data.get('phone'),
-                                            email = request.data.get('email'),
-                                            gender = request.data.get('gender'),
-                                            fcm_id = request.data.get('fcm_id'),
-                                            address = request.data.get('address')
-                                            )
+                                               name = request.data.get('name'),
+                                               birthday = request.data.get('birthday'),
+                                               height = request.data.get('height'),
+                                               weight = request.data.get('weight'),
+                                               phone = request.data.get('phone'),
+                                               email = request.data.get('email'),
+                                               gender = request.data.get('gender'),
+                                               fcm_id = request.data.get('fcm_id'),
+                                               address = request.data.get('address')
+                                               )
                     user_profile.save()
             else:
                 user_profile = UserProfile(user=user_account)
