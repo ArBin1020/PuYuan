@@ -9,6 +9,30 @@ from User.models import account
 from django.utils import timezone
 from django.db import transaction
 from User.models import account
+
+DEFAULT_DIARY_DICT = {
+    "id": 0,
+    "user_id": 0,
+    "systolic": 0,
+    "diastolic": 0,
+    "pulse": 0,
+    "weight": 0.0,
+    "body_fat": 0.0,
+    "bmi": 0.0,
+    "sugar": 0.0,
+    "exercise": 0,
+    "drug": 0,
+    "timeperiod": 0,
+    "description": "",
+    "meal": 0,
+    "tag": [{"name": [], "message": ""}],  # name: list[str]
+    "image": ["http://www.example.com"],
+    "location": {"lat": "", "lng": ""},
+    "reply": "",
+    "recorded_at": "",
+    "type": "blood_pressure",
+}
+
 class BodyUserProfile(viewsets.ViewSet):
     # complete
     def setprofile(self, request):
@@ -304,12 +328,51 @@ class Records(viewsets.ViewSet):
 class BodyGetDiet(viewsets.ViewSet):
     def getdiet(self, request):
         try:
+            # date = request.data.get('date')
+            # user_account = account.objects.get(id=get_token(request))
+            
+            # dict_data = DEFAULT_DIARY_DICT
+            # response = []
+            # dict_data['id'] = user_account.id
+            # if BloodPressure.objects.filter(user_id=user_account):
+            #     # print('123')
+            #     bloodpressures = BloodPressure.objects.filter(user_id=user_account).latest('recorded_at')
+            #     dict_data['systolic'] = bloodpressures.systolic
+            #     dict_data['diastolic'] = bloodpressures.diastolic
+            #     dict_data['pulse'] = bloodpressures.pulse
+            #     dict_data['type'] = 'blood_pressure'
+            # if Weight.objects.filter(user_id=user_account):
+            #     weights = Weight.objects.filter(user_id=user_account).latest('recorded_at')
+            #     dict_data['weight'] = weights.weight
+            #     dict_data['body_fat'] = weights.body_fat
+            #     dict_data['bmi'] = weights.bmi
+            #     dict_data['type'] = 'weight'
+            # if BloodSuger.objects.filter(user_id=user_account):
+            #     bloodsugers = BloodSuger.objects.filter(user_id=user_account).latest('recorded_at')
+            #     dict_data['sugar'] = bloodsugers.sugar
+            #     dict_data['exercise'] = bloodsugers.exercise
+            #     dict_data['drug'] = bloodsugers.drug
+            #     dict_data['timeperiod'] = bloodsugers.timeperiod
+            #     dict_data['type'] = 'blood_suger'
+            # if Diet.objects.filter(user_id=user_account):
+            #     diets = Diet.objects.filter(user_id=user_account).latest('recorded_at')
+            #     dict_data['description'] = diets.description
+            #     dict_data['meal'] = diets.meal
+            #     dict_data['tag'] = diets.tag
+            #     dict_data['image'] = diets.image
+            #     dict_data['lat'] = diets.lat
+            #     dict_data['lng'] = diets.lng
+            #     dict_data['recorded_at'] = diets.recorded_at
+            #     dict_data['type'] = 'diet'
+
+            # response.append(dict_data)
             user_id = get_token(request)
+            date = request.data.get('date')
             bloodpressures = BloodPressure.objects.filter(user_id=user_id)
+            
             weights = Weight.objects.filter(user_id=user_id)
             bloodsugers = BloodSuger.objects.filter(user_id=user_id)
             diets = Diet.objects.filter(user_id=user_id)
-
             response = []
             for bloodpressure, weight, bloodsuger, diet in zip(bloodpressures, weights, bloodsugers, diets):
                 diet_data = {
@@ -583,6 +646,7 @@ class Body_Badge(viewsets.ViewSet):
         try:
             user_account = account.objects.get(id=get_token(request))
             badge = request.data.get('badge')
+            print(badge)
             if badge is None:
                 return Response({'status': '1', 'message': '參數錯誤'}, status=400)
             return Response({'status': '0', 'message': '成功'})
