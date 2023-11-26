@@ -2,11 +2,12 @@
 from .models import *
 from Body.models import *
 from Friend.models import *
-from .serializers import accountSerializer, OtherSerializer, ShareSerializer
 from rest_framework import viewsets
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password,check_password
 from django.contrib.auth.tokens import default_token_generator
+
+from datetime import datetime
 
 import random
 import string
@@ -20,22 +21,23 @@ class accountRegister(viewsets.ViewSet):
         password = request.data.get('password')
         try:
             encrypted_password = make_password(password)
-            serializer = accountSerializer(data=request.data)
-            if serializer.is_valid():
+            if not account.objects.filter(email=email).first():
+                time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 user = account(email=email, password=encrypted_password)
                 user.save()
-                Invite.objects.create(user=user, invite_code=random.randint(100000, 999999))
+                # Invite.objects.create(user=user, invite_code=random.randint(100000, 999999))
                 user_id = account.objects.filter(email=email).first().id
-                UserProfile.objects.create(user_id=user_id, name="USER_"+str(user_id), invite_code=random.randint(100000, 999999))
-                UserDefault.objects.create(user_id=user_id)
-                UserSetting.objects.create(user_id=user_id)
-                vip.objects.create(user_id=user_id)
-                Medical.objects.create(user_id=user_id)
-                Friend.objects.create(user_id=user_id, relation_id=1, data_type=1, status=1, read=1)
-                news.objects.create(user_id=user_id,pushed_at="2020-01-01 00:00:00",created_at="2020-01-01 00:00:00",updated_at="2020-01-01 00:00:00")
+
+                UserProfile.objects.create(user_id=user_id, name="USER_"+str(user_id), invite_code=random.randint(100000, 999999), created_at=time, updated_at=time)
+                UserDefault.objects.create(user_id=user_id, created_at=time, updated_at=time)
+                UserSetting.objects.create(user_id=user_id, created_at=time, updated_at=time)
+                vip.objects.create(user_id=user_id, started_at=time, ended_at=time, created_at=time, updated_at=time)
+                Medical.objects.create(user_id=user_id, created_at=time, updated_at=time)
+                Friend.objects.create(user_id=user_id, created_at=time, updated_at=time,status=0)
+                news.objects.create(user_id=user_id,pushed_at=time ,created_at=time,updated_at=time)
                 return Response({'status': "0", 'message': '成功'})
-            return Response({'status': "1", 'message': '失敗 - {}'.format(serializer.errors)})
-                
+            
+            return Response({'status': "1", 'message': '失敗'}, status=400)
         except Exception as e:
             print(e)
             return Response({'status': "1", 'message': f'失敗 - {str(e)}'}, status=400)
