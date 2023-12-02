@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import render
+# Create your views here.
 from rest_framework import viewsets
 from rest_framework.response import Response
 from utils import *
@@ -8,7 +8,30 @@ from User.models import *
 from Body.models import *
 from Friend.models import *
 
-# Create your views here.
+DEFAULT_DIARY_DICT = {
+    "id": 0,
+    "user_id": 0,
+    "systolic": 0,
+    "diastolic": 0,
+    "pulse": 0,
+    "weight": 0.0,
+    "body_fat": 0.0,
+    "bmi": 0.0,
+    "sugar": 0.0,
+    "exercise": 0,
+    "drug": 0,
+    "timeperiod": 0,
+    "description": "",
+    "meal": 0,
+    "tag": [{"name": [], "message": ""}],
+    "image": ["http://www.example.com"],
+    "location": {"lat": "", "lng": ""},
+    "reply": "",
+    "recorded_at": "",
+    "type": "",
+}
+
+# 2-1 個人資訊設定, 個人資訊
 class User_Profile(viewsets.ViewSet):
     def update(self, request):
         try:
@@ -110,7 +133,7 @@ class User_Profile(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
-
+# 2-2 個人預設值
 class User_Default(viewsets.ViewSet):
     def update(self, request):
         try:
@@ -124,7 +147,7 @@ class User_Default(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
-    
+# 2-3 個人設定
 class User_Setting(viewsets.ViewSet):
     def update(self, request):
         try:
@@ -138,12 +161,12 @@ class User_Setting(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
-        
+# 2-4 血壓測量結果
 class Blood_Pressure(viewsets.ViewSet):
     def create(self, request):
         try:
             user_id = get_user_id(request)
-            Blood_Pressure.objects.create(
+            User_Blood_Pressure.objects.create(
                 user_id=user_id,
                 systolic=request.data['systolic'],
                 diastolic=request.data['diastolic'],
@@ -154,15 +177,15 @@ class Blood_Pressure(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
-    
-class Blood_Weight(viewsets.ViewSet):
+# 2-5 體重測量結果 
+class Weight(viewsets.ViewSet):
     def create(self, request):
         try:
             user_id = get_user_id(request)
-            Blood_Weight.objects.create(
+            User_Weight.objects.create(
                 user_id=user_id,
                 weight=request.data['weight'],
-                body_fat=request.data['body_fat']
+                body_fat=request.data['body_fat'],
                 bmi=request.data['bmi'],
                 recorded_at=request.data['recorded_at']
             )
@@ -170,12 +193,12 @@ class Blood_Weight(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
-
+# 2-6 血糖測量結果 
 class Blood_Sugar(viewsets.ViewSet):
     def create(self, request):
         try:
             user_id = get_user_id(request)
-            Blood_Sugar.objects.create(
+            User_Blood_Sugar.objects.create(
                 user_id=user_id,
                 sugar=request.data['sugar'],
                 recorded_at=request.data['recorded_at'],
@@ -187,62 +210,301 @@ class Blood_Sugar(viewsets.ViewSet):
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
         
-
+# 2-7 上一筆紀錄資訊,  刪除日記記錄
 class Records(viewsets.ViewSet):
-    def list(self, request):
+    def create(self, request):
         try:
             user_id = get_user_id(request)
-            records = []
-            blood_pressures = Blood_Pressure.objects.filter(user_id=user_id).order_by('-id')
-            blood_sugars = Blood_Sugar.objects.filter(user_id=user_id).order_by('-id')
-            blood_weights = Blood_Weight.objects.filter(user_id=user_id).order_by('-id')
-            for blood_pressure in blood_pressures:
-                records.append({
-                    'id': blood_pressure.id,
-                    'user_id': blood_pressure.user_id,
+            if User_Blood_Sugar.objects.filter(user_id=user_id):
+                blood_sugar = User_Blood_Sugar.objects.filter(user_id=user_id).latest('recorded_at')
+                response_sugar = {
+                    'sugar': blood_sugar.sugar,
+                }
+            else:
+                response_sugar = {
+                    'sugar': 0,
+                }
+            
+            if User_Blood_Pressure.objects.filter(user_id=user_id):
+                blood_pressure = User_Blood_Pressure.objects.filter(user_id=user_id).latest('recorded_at')
+                response_pressure = {
                     'systolic': blood_pressure.systolic,
                     'diastolic': blood_pressure.diastolic,
                     'pulse': blood_pressure.pulse,
-                    'recorded_at': blood_pressure.recorded_at,
-                    'created_at': blood_pressure.created_at,
-                    'updated_at': blood_pressure.updated_at,
-                })
-            for blood_sugar in blood_sugars:
-                records.append({
-                    'id': blood_sugar.id,
-                    'user_id': blood_sugar.user_id,
-                    'sugar': blood_sugar.sugar,
-                    'timeperiod': blood_sugar.timeperiod,
-                    'drug': blood_sugar.drug,
-                    'exercise': blood_sugar.exercise,
-                    'recorded_at': blood_sugar.recorded_at,
-                    'created_at': blood_sugar.created_at,
-                    'updated_at': blood_sugar.updated_at,
-                })
-            for blood_weight in blood_weights:
-                records.append({
-                    'id': blood_weight.id,
-                    'user_id': blood_weight.user_id,
-                    'weight': blood_weight.weight,
-                    'body_fat': blood_weight.body_fat,
-                    'bmi': blood_weight.bmi,
-                    'recorded_at': blood_weight.recorded_at,
-                    'created_at': blood_weight.created_at,
-                    'updated_at': blood_weight.updated_at,
-                })
-            return Response({'status':'0','message': 'success','records':records}, status=200)
+                }
+            else:
+                response_pressure = {
+                    'systolic': 0,
+                    'diastolic': 0,
+                    'pulse': 0,
+                }
+            if User_Weight.objects.filter(user_id=user_id):
+                weight = User_Weight.objects.filter(user_id=user_id).latest('recorded_at')
+                response_weight = {
+                    'weight': weight.weight,
+                    'body_fat': weight.body_fat,
+                    'bmi': weight.bmi,
+                }
+            else:
+                response_weight = {
+                    'weight': 0,
+                    'body_fat': 0,
+                    'bmi': 0,
+                }
+            return Response({'status':'0',
+                             'message': 'success',
+                             'blood_sugars':response_sugar,
+                             'blood_pressures':response_pressure,
+                             'weights':response_weight
+                             }, status=200)
+            
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
 
-class 
+    def remove(self, request):
+        try:
+            user_id = get_user_id(request)
+            deleteObject = request.data['deleteObject']
+            for data in deleteObject:
+                if data == 'blood_surgars':
+                    for i in deleteObject['blood_surgars']:
+                        User_Blood_Sugar.objects.filter(id=i,user_id=user_id).delete()
+                elif data == 'blood_pressures':
+                    for i in deleteObject['blood_pressures']:
+                        User_Blood_Pressure.objects.filter(id=i,user_id=user_id).delete()
+                elif data == 'weights':
+                    for i in deleteObject['weights']:
+                        User_Weight.objects.filter(id=i,user_id=user_id).delete()
+                elif data == 'diets':
+                    for i in deleteObject['diets']:
+                        User_Diary.objects.filter(id=i,user_id=user_id).delete()
+                return Response({'status':'0','message': 'success'}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+# 2-8 日記列表
+class Diary(viewsets.ViewSet):
+    def list(self, request):
+        try:
+            user_id = get_user_id(request)
+            date = request.query_params.get('date')
+            response = []
+            if User_Blood_Pressure.filter(user_id=user_id):
+                for blood_pressure in User_Blood_Pressure.objects.filter(user_id=user_id, recorded_at__startswith=date):
+                    blood_pressure_data = DEFAULT_DIARY_DICT.copy()
+                    blood_pressure_data.update(
+                        user_id=user_id,
+                        systolic=blood_pressure.systolic,
+                        diastolic=blood_pressure.diastolic,
+                        pulse=blood_pressure.pulse,
+                        recorded_at=blood_pressure.recorded_at,
+                        type="blood_pressure"
+                    )
+                    response.append(blood_pressure_data)
+            if User_Weight.filter(user_id=user_id):
+                for weight in User_Weight.objects.filter(user_id=user_id, recorded_at__startswith=date):
+                    weight_data = DEFAULT_DIARY_DICT.copy()
+                    weight_data.update(
+                        user_id=user_id,
+                        weight=weight.weight,
+                        body_fat=weight.body_fat,
+                        bmi=weight.bmi,
+                        recorded_at=weight.recorded_at,
+                        type="weight"
+                    )
+                    response.append(weight_data)
+            if User_Blood_Sugar.filter(user_id=user_id):
+                for blood_sugar in User_Blood_Sugar.objects.filter(user_id=user_id, recorded_at__startswith=date):
+                    blood_sugar_data = DEFAULT_DIARY_DICT.copy()
+                    blood_sugar_data.update(
+                        user_id=user_id,
+                        sugar=blood_sugar.sugar,
+                        exercise=blood_sugar.exercise,
+                        drug=blood_sugar.drug,
+                        timeperiod=blood_sugar.timeperiod,
+                        recorded_at=blood_sugar.recorded_at,
+                        type="blood_sugar"
+                    )
+                    response.append(blood_sugar_data)
+            if User_Diary.filter(user_id=user_id):
+                for diary in User_Diary.objects.filter(user_id=user_id, recorded_at__startswith=date):
+                    diary_data = DEFAULT_DIARY_DICT.copy()
+                    diary_data.update(
+                        user_id=user_id,
+                        description=diary.description,
+                        meal=diary.meal,
+                        tag=[{
+                            "name": diary.tag.split(","),
+                            "message": ""
+                        }],
+                        location={
+                            "lat": str(diary.lat),
+                            "lng": str(diary.lng)
+                        },
+                        recorded_at=diary.recorded_at,
+                        type="diet"
+                    )
+                    response.append(diary_data)
+            return Response({'status':'0','message': 'success','diary':response}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+# 2-9 飲食日記
+class Diet(viewsets.ViewSet):
+    def create(self, request):
+        try:
+            user_id = get_user_id(request)
+            tag = request.data.get('tag[]')
+            tags = ','.join(tag)
+            User_Diary.objects.create(
+                user_id=user_id,
+                description=request.data['description'],
+                meal=request.data['meal'],
+                tag=tags,
+                lat=request.data['lat'],
+                lng=request.data['lng'],
+                recorded_at=request.data['recorded_at']
+            )
+            return Response({'status':'0','message': 'success','image_url':'https://www.puyuan.tech/media'}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+# 2-10 糖化血色素
+class A1c(viewsets.ViewSet):
+    def create(self, request):
+        try:
+            user_id = get_user_id(request)
+            A1c.objects.create(
+                user_id=user_id,
+                a1c=request.data['a1c'],
+                recorded_at=request.data['recorded_at']
+            )
+            return Response({'status':'0','message': 'success'}, status=200)
+        except Exception as e:
+            return Response({'status':'1','message': 'error'}, status=400)
 
-class Care:
+    def list(self, request):
+        try:
+            user_id = get_user_id(request)
+            a1cs = A1c.objects.filter(user_id=user_id).order_by('-id')
+            a1cs_list = []
+            for a1c in a1cs:
+                a1cs_list.append({
+                    'id': a1c.id,
+                    'user_id': a1c.user_id,
+                    'a1c': a1c.a1c,
+                    'recorded_at': a1c.recorded_at,
+                    'created_at': a1c.created_at,
+                    'updated_at': a1c.updated_at,
+                })
+            return Response({'status':'0','message': 'success','a1cs':a1cs_list}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+    
+    def remove(self, request):
+        try:
+            user_id = get_user_id(request)
+            ids = request.data['ids[]']
+            if A1c.objects.filter(user_id=user_id):
+                for data_id in ids:
+                    A1c.objects.filter(id=data_id).delete()
+                return Response({'status':'0','message': 'success'}, status=200)
+
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+# 2-11 就醫資訊
+class Medical(viewsets.ViewSet):
+    def update(self, request):
+        try:
+            user_id = get_user_id(request)
+            datas = json.loads(request.data['data'])
+            for data in datas:
+                if datas[data] == '':
+                    continue
+                else:
+                    User_Medical.objects.filter(user_id=user_id).update(**{data:datas[data]})
+            return Response({'status':'0','message': 'success'}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+        
+    def list(self, request):
+        try:
+            user_id = get_user_id(request)
+            medical = User_Medical.objects.get(user_id=user_id)
+            response = {
+                'id': medical.id,
+                'user_id': medical.user_id,
+                'diabetes_type': medical.diabetes_type,
+                'oad': medical.oad,
+                'insulin': medical.insulin,
+                'anti_hypertensive': medical.anti_hypertensive,
+                'created_at': medical.created_at,
+                'updated_at': medical.updated_at,
+            }
+            return Response({'status':'0','message': 'success','medical_info':response}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+# 2-12 藥物資訊     
+class Drug(viewsets.ViewSet):
+    def create(self, request):
+        try:
+            user_id = get_user_id(request)
+            User_Care.objects.create(
+                user_id=user_id,
+                data_type=request.data['type'],
+                name=request.data['name'],
+                recorded_at=request.data['recorded_at'],
+                created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                updated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
+            return Response({'status':'0','message': 'success'}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+    def list(self, request):
+        try:
+            user_id = get_user_id(request)
+            drugs = User_Drug.objects.filter(user_id=user_id).order_by('-id')
+            drugs_list = []
+            for drug in drugs:
+                drugs_list.append({
+                    'id': drug.id,
+                    'user_id': drug.user_id,
+                    'data_type': drug.data_type,
+                    'name': drug.name,
+                    'recorded_at': drug.recorded_at,
+                    'created_at': drug.created_at,
+                    'updated_at': drug.updated_at,
+                })
+            return Response({'status':'0','message': 'success','drug_useds':drugs_list}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+
+    def remove(self, request):
+        try:
+            user_id = get_user_id(request)
+            ids = request.data['ids[]']
+            if User_Drug.objects.filter(user_id=user_id):
+                for data_id in ids:
+                    User_Drug.objects.filter(id=data_id).delete()
+                return Response({'status':'0','message': 'success'}, status=200)
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+# 2-13 關懷諮詢     
+class Care(viewsets.ViewSet):
     def create(self, request):
         try:
             user_id = get_user_id(request)
             message = request.data['message']
-            User_Care.objects.filter(user_id=user_id).create(
+            User_Care.objects.create(
+                user_id=user_id,
                 message=message,
                 created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 updated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -271,8 +533,21 @@ class Care:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
 
+    def remove(self, request):
+        try:
+            user_id = get_user_id(request)
+            ids = request.data['ids[]']
+            if User_Drug.objects.filter(user_id=user_id):
+                for data_id in ids:
+                    User_Drug.objects.filter(id=data_id).delete()
+                return Response({'status':'0','message': 'success'}, status=200)
+
+        except Exception as e:
+            print(e)
+            return Response({'status':'1','message': 'error'}, status=400)
+# 2-14 更新 badge       
 class Badge(viewsets.ViewSet):
-    def create(self, request):
+    def update(self, request):
         try:
             user_id = get_user_id(request)
             User_Info.objects.filter(id=user_id).update(**{'badge':request.data['badge']})
