@@ -12,9 +12,9 @@ def decode_session_data(token):
 
 def get_user_id(request):
     try:
-        authorization_header = request.META.get('HTTP_AUTHORIZATION')
+        authorization_header = request.headers.get('Cookie')
         if authorization_header:
-            parts = authorization_header.split()
+            parts = authorization_header.split() 
             if len(parts) == 2 and parts[0].lower() == 'bearer':
                 token = parts[1]
                 user_id = decode_session_data(token)

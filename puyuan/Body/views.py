@@ -3,10 +3,11 @@ import json
 from rest_framework import viewsets
 from rest_framework.response import Response
 from utils import *
-
+from django.forms.models import model_to_dict
 from User.models import *
 from Body.models import *
 from Friend.models import *
+from django.core import serializers
 
 DEFAULT_DIARY_DICT = {
     "id": 0,
@@ -32,7 +33,7 @@ DEFAULT_DIARY_DICT = {
 }
 
 # 2-1 個人資訊設定, 個人資訊
-class User_Profile(viewsets.ViewSet):
+class Profile(viewsets.ViewSet):
     def update(self, request):
         try:
             user_id = get_user_id(request)
@@ -47,20 +48,24 @@ class User_Profile(viewsets.ViewSet):
     
     def list(self, request):
         try:
+            
             user_id = get_user_id(request)
-            user = User_Info.objects.get(id=user_id)
+            user = User_Info.objects.filter(id=user_id).first()
+            print(user)
+            user = model_to_dict(user)
+            print(user)
             default = User_Default.objects.get(user_id=user_id)
             setting = User_Setting.objects.get(user_id=user_id)
-            vip = vip.objects.get(user_id=user_id)
+            # print(f'user:{user},default:{default},setting:{setting},vip:{vip}')
             resopnse = {
                 "id": user.id,
-                "name": user.name,
+                "name": user.username,
                 "account": user.account,
                 "email": user.email,
                 "phone": user.phone,
                 "fb_id": "未設置",
                 "status": user.status,
-                "group": user.groups,
+                "group": "0",
                 "birthday": user.birthday,
                 "height": user.height,
                 "weight": user.weight,
@@ -129,12 +134,12 @@ class User_Profile(viewsets.ViewSet):
                     "updated_at" : vip.updated_at
                 }
             }
-            return Response({'status':'0','message': 'success','user':resopnse}, status=200)
+            return Response({'status':'0','message': 'success','user': resopnse}, status=200)
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
 # 2-2 個人預設值
-class User_Default(viewsets.ViewSet):
+class Default(viewsets.ViewSet):
     def update(self, request):
         try:
             user_id = get_user_id(request)
@@ -148,7 +153,7 @@ class User_Default(viewsets.ViewSet):
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
 # 2-3 個人設定
-class User_Setting(viewsets.ViewSet):
+class Setting(viewsets.ViewSet):
     def update(self, request):
         try:
             user_id = get_user_id(request)

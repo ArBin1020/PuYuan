@@ -3,12 +3,12 @@ from .views import *
 
 urlpatterns = [
     # 01 個人資訊
-    path('', User_Profile.as_view({'patch': 'update',
-                                   'get': 'list'}),
-                                   name='user_profile'),
+    path('', Profile.as_view({'patch': 'update',
+                              'get': 'list'}),
+                                name='user_profile'),
 
-    path('default', User_Default.as_view({'patch': 'update'}),name='user_default'),
-    path('setting', User_Setting.as_view({'patch': 'update'}),name='user_setting'),
+    path('default', Default.as_view({'patch': 'update'}),name='user_default'),
+    path('setting', Setting.as_view({'patch': 'update'}),name='user_setting'),
     
     #02 測量上傳
     path('blood/pressure', Blood_Pressure.as_view({'post': 'create',}),name='blood_pressure'),

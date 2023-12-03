@@ -24,12 +24,13 @@ class Register(viewsets.ViewSet):
             
             # create default data
             # create user
-            user = User_Info.objects.create_user(
+            user = User_Info(
                 email=email,
                 username='User',
                 password=make_password(request.data['password']),
                 invite_code=random.randint(100000, 999999)
             )
+            user.save()
             user_id = user.id
 
             User_Default.objects.create(user_id=user)
@@ -55,23 +56,23 @@ class Login(viewsets.ViewSet):
             if not User_Info.objects.filter(email=email).exists():
                 return Response({'status':'1','message': 'Email does not exist'}, status=400)
             
-            user = User_Info.objects.get(email=email)
+            user = User_Info.objects.filter(email=email).first()
             
             if not user.check_password(password):
                 return Response({'status':'1','message': 'Password error'}, status=400)
-            print('test')
             
             if user.is_verify == False:
                 return Response({'status':'2','message': 'Account not verified'}, status=400)
-
+            request.session.flush()
+            
             request.session["user_id"] = user.id
             request.session.save()
             
             user.last_login = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             user.login_times += 1
             user.save()
-            print(f'User ID: {user.id} login,Session ID: {Session.session_key} ')
-            return Response({'status':'0','message': 'success', 'token': str(Session.session_key)}, status=200)
+            print(f'User ID: {user.id} login,Session ID: {request.session.session_key} ')
+            return Response({'status':'0','message': 'success', 'token': str(request.session.session_key)}, status=200)
         
         except Exception as e:
             print(e)
