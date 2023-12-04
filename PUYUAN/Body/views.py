@@ -344,8 +344,6 @@ class BodyGetDiet(viewsets.ViewSet):
             # print(diets.meal)
             
             response = []
-
-            print('tmp')
             if BloodPressure.objects.filter(user_id=user_id):
                 for bloodpressure in BloodPressure.objects.filter(user_id=user_id, recorded_at__startswith=date_time):
                     bloodpressure_data = DEFAULT_DIARY_DICT.copy()
@@ -681,6 +679,7 @@ class Body_Badge(viewsets.ViewSet):
         try:
             user_account = account.objects.get(id=get_token(request))
             badge = request.data.get('badge')
+            print(badge)
             if badge is None:
                 return Response({'status': '1', 'message': '參數錯誤'}, status=400)
             return Response({'status': '0', 'message': '成功'})

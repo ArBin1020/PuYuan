@@ -25,7 +25,7 @@ class accountRegister(viewsets.ViewSet):
                 time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 user = account(email=email, password=encrypted_password)
                 user.save()
-                Invite.objects.create(user=user, invite_code=random.randint(100000, 999999))
+                # Invite.objects.create(user=user, invite_code=random.randint(100000, 999999))
                 user_id = account.objects.filter(email=email).first().id
 
                 UserProfile.objects.create(user_id=user_id, name="USER_"+str(user_id), invite_code=random.randint(100000, 999999), created_at=time, updated_at=time)
@@ -33,7 +33,7 @@ class accountRegister(viewsets.ViewSet):
                 UserSetting.objects.create(user_id=user_id, created_at=time, updated_at=time)
                 vip.objects.create(user_id=user_id, started_at=time, ended_at=time, created_at=time, updated_at=time)
                 Medical.objects.create(user_id=user_id, created_at=time, updated_at=time)
-                Friend.objects.create(user_id=user_id, relation_id=1, data_type=1, status=1, read=1, created_at=time, updated_at=time)
+                Friend.objects.create(user_id=user_id, created_at=time, updated_at=time,status=0)
                 news.objects.create(user_id=user_id,pushed_at=time ,created_at=time,updated_at=time)
                 return Response({'status': "0", 'message': '成功'})
             

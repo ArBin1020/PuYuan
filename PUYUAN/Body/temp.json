@@ -1,78 +1,32 @@
-{
-    "id": 2,
-    "name": "USER_2",
-    "account": "",
-    "email": "0000",
-    "phone": "0000",
-    "fb_id": "未設置",
-    "status": "VIP",
-    "group": "0",
-    "birthday": "2020-01-01",
-    "height": 1.0,
-    "weight": 1.0,
-    "gender": 1,
-    "address": "abc",
-    "unread_records": [
-        0,
-        0,
-        0
-    ],
-    "verified": 1,
-    "privacy_policy": 1,
-    "must_change_password": 0,
-    "fcm_id": "",
-    "login_times": 0,
-    "created_at": "2023-11-24 10:49:16",
-    "updated_at": "2023-11-24 10:49:16",
-    "default": {
-        "id": 2,
-        "user_id": 2,
-        "sugar_delta_max": 10.0,
-        "sugar_delta_min": 1.0,
-        "sugar_morning_max": 10.0,
-        "sugar_morning_min": 1.0,
-        "sugar_evening_max": 10.0,
-        "sugar_evening_min": 1.0,
-        "sugar_before_max": 10.0,
-        "sugar_before_min": 1.0,
-        "sugar_after_max": 10.0,
-        "sugar_after_min": 1.0,
-        "systolic_max": 10,
-        "systolic_min": 1,
-        "diastolic_max": 10,
-        "diastolic_min": 1,
-        "pulse_max": 10,
-        "pulse_min": 1,
-        "weight_max": 10.0,
-        "weight_min": 1.0,
-        "bmi_max": 10.0,
-        "bmi_min": 1.0,
-        "body_fat_max": 10.0,
-        "body_fat_min": 1.0,
-        "created_at": "2023-11-24 10:49:16",
-        "updated_at": "2023-11-24 10:49:16"
+[
+    {
+        "id": 7,
+        "user_id": 8,
+        "relation_id": 1,
+        "type": 1,
+        "status": 0,
+        "read": 1,
+        "created_at": "0",
+        "updated_at": "0",
+        "relation": {
+            "id": 1,
+            "name": "",
+            "account": "aaa@gmail.com"
+        }
     },
-    "setting": {
-        "id": 2,
-        "user_id": 2,
-        "after_recording": 0,
-        "no_recording_for_a_day": 0,
-        "over_max_or_under_min": 1,
-        "after_meal": 1,
-        "unit_of_sugar": 1,
-        "unit_of_weight": 1,
-        "unit_of_height": 1,
-        "created_at": "2023-11-24 10:49:16",
-        "updated_at": "2023-11-24 10:49:16"
-    },
-    "vip": {
-        "id": 2,
-        "user_id": 2,
-        "level": 1,
-        "remark": 1.0,
-        "started_at": "2023-11-24 10:49:16",
-        "ended_at": "2023-11-24 10:49:16",
-        "created_at": "2023-11-24 10:49:16",
-        "updated_at": "2023-11-24 10:49:16"
+    {
+        "id": 8,
+        "user_id": 8,
+        "relation_id": 5,
+        "type": 1,
+        "status": 0,
+        "read": 0,
+        "created_at": "0",
+        "updated_at": "0",
+        "relation": {
+            "id": 5,
+            "name": "",
+            "account": "aaa@gmail.com"
+        }
     }
-}
+]

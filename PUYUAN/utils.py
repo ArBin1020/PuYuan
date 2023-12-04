@@ -14,6 +14,7 @@ def decode_session_data(token):
 
 def get_token(request):
     try:
+        print(request.headers)
         authorization_header = request.META.get('HTTP_AUTHORIZATION')
         if authorization_header:
             parts = authorization_header.split()
