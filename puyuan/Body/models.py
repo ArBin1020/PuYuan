@@ -72,7 +72,9 @@ class User_Blood_Pressure(models.Model):
     diastolic = models.IntegerField(default=0)
     pulse = models.IntegerField(default=0)
     recorded_at = models.DateTimeField(default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
+    
+    class Meta:
+        db_table = 'User_Blood_Pressure'
 
 class User_Blood_Sugar(models.Model):    
     user_id = models.ForeignKey(User_Info, on_delete=models.CASCADE)

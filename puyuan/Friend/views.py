@@ -16,12 +16,11 @@ class Code(viewsets.ViewSet):
     
 class List(viewsets.ViewSet):
     def list(self, request):
-        
         try:
             user_id = get_user_id(request)
             friend_list = []
-            friends = Friend.objects.get(user_id=user_id)
-
+            friends = Friend.objects.filter(user_id=user_id)
+            
             for friend in friends:
                 friend_list.append({
                     'id':friend.id,
@@ -140,25 +139,27 @@ class Friend_Results(viewsets.ViewSet):
             user_id = get_user_id(request)
             response = []
             friend_list = Friend.objects.filter(user_id=user_id)
-
             for friend in friend_list:
+                if friend.relation_id == 0:
+                    continue
                 friend_info = User_Info.objects.get(id=friend.relation_id)
+
                 response.append({
-                    'id':friend.id,
-                    'user_id':friend.user_id,
-                    'relation_id':friend.relation_id,
-                    'type':friend.relation_type,
-                    'status':friend.status,
-                    'read':friend.read,
-                    'created_at':friend.created_at,
-                    'updated_at':friend.updated_at,
-                    'relation':{
-                        'id':friend_info.user_id,
-                        'name':friend_info.name,
-                        'account':friend_info.account,
+                    'id': friend.id,
+                    'user_id': friend.user_id,
+                    'relation_id': friend.relation_id,
+                    'type': friend.relation_type,
+                    'status': friend.status,
+                    'read': friend.read,
+                    'created_at': friend.created_at,
+                    'updated_at': friend.updated_at,
+                    'relation': {
+                        'id': friend_info.id,
+                        'name': friend_info.name,
+                        'account': friend_info.account,
                     }
                 })
-            return Response({'status':'0','message': 'success','results':response}, status=200)
+            return Response({'status': '0', 'message': '成功', 'results': response}, status=200)
         except Exception as e:
             print(e)
-            return Response({'status':'1','message': 'error'}, status=400)
+            return Response({'status': '1', 'message': '錯誤'}, status=400)

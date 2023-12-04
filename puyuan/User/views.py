@@ -200,27 +200,11 @@ class Share(viewsets.ViewSet):
     def create(self, request):
         try:
             user_id = get_user_id(request)
-            member_id = request.data['member_id']
-            group = request.data['group']
-            title = request.data['title']
-            message = request.data['message']
-            data_type = request.data['data_type']
-            relation_type = request.data['relation_type']
-            pushed_at = request.data['pushed_at']
-            created_at = request.data['created_at']
-            updated_at = request.data['updated_at']
-
+            usre_id_instance = User_Info.objects.get(id=user_id)
             News_Share.objects.create(
-                user_id=user_id,
-                member_id=member_id,
-                group=group,
-                title=title,
-                message=message,
-                data_type=data_type,
-                relation_type=relation_type,
-                pushed_at=pushed_at,
-                created_at=created_at,
-                updated_at=updated_at,
+                user_id=usre_id_instance,
+                data_type=request.data['type'],
+                relation_type=request.data['relation_type'],
             )
             return Response({'status':'0','message': 'success'}, status=200)
         except Exception as e:
