@@ -158,8 +158,8 @@ class User_Care(models.Model):
     member_id = models.IntegerField(default=0)
     reply_id = models.IntegerField(default=0)
     message = models.CharField(max_length=255, null=True, default="")
-    created_at = models.DateTimeField(default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    updated_at = models.DateTimeField(default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    created_at = models.DateTimeField(default=datetime.now().strftime("%Y-%m-%d %H"))
+    updated_at = models.DateTimeField(default=datetime.now().strftime("%Y-%m-%d %H"))
 
     class Meta:
         db_table = 'User_Care'

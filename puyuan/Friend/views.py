@@ -68,15 +68,14 @@ class Send(viewsets.ViewSet):
             user_id = get_user_id(request)
             data_type = request.data['type']
             invite_code = request.data['invite_code']
-
             # 取得要加的朋友的資料
             friend = User_Info.objects.get(invite_code=invite_code)
-
+            user_id_instance = User_Info.objects.get(id=user_id)
             # 檢查是否已經有加過
             if Friend.objects.filter(user_id=user_id,relation_id=friend.id,status=1):
                 return Response({'status':'2','message': 'already added'}, status=400)
             Friend.objects.create(
-                user_id=user_id,
+                user_id=user_id_instance,
                 relation_id=friend.id,
                 relation_type=data_type,
                 read=0,
@@ -143,7 +142,7 @@ class Friend_Results(viewsets.ViewSet):
                 if friend.relation_id == 0:
                     continue
                 friend_info = User_Info.objects.get(id=friend.relation_id)
-
+                friend_info_instance = User_Info.objects.get(id=friend.user_id)
                 response.append({
                     'id': friend.id,
                     'user_id': friend.user_id,
@@ -154,8 +153,8 @@ class Friend_Results(viewsets.ViewSet):
                     'created_at': friend.created_at,
                     'updated_at': friend.updated_at,
                     'relation': {
-                        'id': friend_info.id,
-                        'name': friend_info.name,
+                        'id': friend_info_instance.id,
+                        'name': friend_info.username,
                         'account': friend_info.account,
                     }
                 })

@@ -530,8 +530,8 @@ class Care(viewsets.ViewSet):
             User_Care.objects.create(
                 user_id=user_id_instance,
                 message=request.data['message'],
-                created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                updated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                created_at=datetime.now().strftime("%Y-%m-%d %H"),
+                updated_at=datetime.now().strftime("%Y-%m-%d %H")
             )
             return Response({'status':'0','message': 'success'}, status=200)
         except Exception as e:
@@ -543,14 +543,15 @@ class Care(viewsets.ViewSet):
             cares = User_Care.objects.filter(user_id=user_id).order_by('-id')
             cares_list = []
             for care in cares:
+                print(care.created_at.strftime('%Y-%m-%d %H'))
                 cares_list.append({
                     'id': care.id,
                     'user_id': user_id,
                     'member_id': care.member_id,
                     'reply_id': care.reply_id,
                     'message': care.message,
-                    'created_at': care.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                    'updated_at': care.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    'created_at': care.created_at.strftime('%Y-%m-%d %H'),
+                    'updated_at': care.updated_at.strftime('%Y-%m-%d %H'),
                 })
             return Response({'status':'0','message': 'success','cares':cares_list}, status=200)
         except Exception as e:
