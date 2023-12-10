@@ -60,7 +60,7 @@ class Profile(viewsets.ViewSet):
             setting = User_Setting.objects.get(user_id=user_id)
             vip = User_VIP.objects.get(user_id=user_id)
 
-            resopnse = {
+            response = {
                 "id": user.id,
                 "name": user.username,
                 "account": user.account,
@@ -137,7 +137,8 @@ class Profile(viewsets.ViewSet):
                     "updated_at" : vip.updated_at
                 }
             }
-            return Response({'status':'0','message': 'success','user': resopnse}, status=200)
+            
+            return Response({'status':'0','message': 'success','user': response}, status=200)
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
@@ -169,13 +170,12 @@ class Setting(viewsets.ViewSet):
                 if datas[data] == '':
                     continue
                 else:
-                    print(data)
-                    print(datas[data])
                     User_Setting.objects.filter(user_id=user_id).update(**{data:datas[data]})
             return Response({'status': '0', 'message': 'success'}, status=200)
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
 # 2-4 血壓測量結果
 class Blood_Pressure(viewsets.ViewSet):
     def create(self, request):
@@ -193,6 +193,7 @@ class Blood_Pressure(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
 # 2-5 體重測量結果 
 class Weight(viewsets.ViewSet):
     def create(self, request):
@@ -210,13 +211,13 @@ class Weight(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
 # 2-6 血糖測量結果 
 class Blood_Sugar(viewsets.ViewSet):
     def create(self, request):
         try:
             user_id = get_user_id(request)
             user_info_instance = User_Info.objects.get(id=user_id)
-            print(request.data['sugar'])
             User_Blood_Sugar.objects.create(
                 user_id=user_info_instance,
                 sugar=request.data['sugar'],
@@ -285,9 +286,11 @@ class Records(viewsets.ViewSet):
     def remove(self, request):
         try:
             user_id = get_user_id(request)
+            
             deleteObject = request.data['deleteObject']
+            
             for data in deleteObject:
-                if data == 'blood_surgars':
+                if data == 'blood_sugars':
                     for i in deleteObject['blood_surgars']:
                         User_Blood_Sugar.objects.filter(id=i,user_id=user_id).delete()
                 elif data == 'blood_pressures':
@@ -303,6 +306,7 @@ class Records(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
 # 2-8 日記列表
 class Diary(viewsets.ViewSet):
     def list(self, request):
@@ -392,6 +396,7 @@ class Diet(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
 # 2-10 糖化血色素
 class A1c(viewsets.ViewSet):
     def create(self, request):
@@ -473,6 +478,7 @@ class Medical(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
 # 2-12 藥物資訊     
 class Drug(viewsets.ViewSet):
     def create(self, request):
@@ -490,6 +496,7 @@ class Drug(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
     def list(self, request):
         try:
             user_id = get_user_id(request)
@@ -521,6 +528,7 @@ class Drug(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
 # 2-13 關懷諮詢     
 class Care(viewsets.ViewSet):
     def create(self, request):
@@ -537,13 +545,13 @@ class Care(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
     def list(self, request):
         try:
             user_id = get_user_id(request)
             cares = User_Care.objects.filter(user_id=user_id).order_by('-id')
             cares_list = []
             for care in cares:
-                print(care.created_at.strftime('%Y-%m-%d %H'))
                 cares_list.append({
                     'id': care.id,
                     'user_id': user_id,
@@ -570,6 +578,7 @@ class Care(viewsets.ViewSet):
         except Exception as e:
             print(e)
             return Response({'status':'1','message': 'error'}, status=400)
+        
 # 2-14 更新 badge       
 class Badge(viewsets.ViewSet):
     def update(self, request):

@@ -213,5 +213,10 @@ class Share(viewsets.ViewSet):
         
 class Share_Check(viewsets.ViewSet):
     def list(self, request, type):
-        
+        user_id = get_user_id(request)
+        share_data = News_Share.objects.filter(relation_type=type,user_id=user_id).order_by('-id')
+        resopnse_data = []
+
+        for data in share_data:
+            pass
         return Response({'status':'0','message': 'success', 'records':[]}, status=200)

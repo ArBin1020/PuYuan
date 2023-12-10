@@ -3,8 +3,8 @@ from .views import *
 
 urlpatterns = [
     # 01 個人資訊
-    path('',Profile.as_view({'patch': 'update'},name='user_profile')),
-    path('/', Profile.as_view({'get': 'list'}),name='user_profile'),
+    # path('',Profile.as_view({'patch': 'update'},name='user_profile')),
+    path('', Profile.as_view({'get': 'list','patch': 'update'}),name='user_profile'),
 
     path('/default', Default.as_view({'patch': 'update'}),name='user_default'),
     path('/setting', Setting.as_view({'patch': 'update'}),name='user_setting'),

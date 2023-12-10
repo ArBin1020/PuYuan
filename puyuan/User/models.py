@@ -4,7 +4,7 @@ from datetime import datetime
 # Create your models here.
 
 class User_Info(AbstractUser):
-    
+    id = models.AutoField(primary_key=True)
     # register
     email = models.CharField(max_length=50,default='',unique=True)
     account = models.CharField(max_length=50,default='')
@@ -31,6 +31,8 @@ class User_Info(AbstractUser):
     # friend_invite_code
     invite_code = models.CharField(max_length=10,default='')
 
+
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS =  ['password']
     class Meta:

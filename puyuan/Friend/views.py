@@ -1,7 +1,9 @@
 import json
+from django.forms import model_to_dict
 # Create your views here.
 from rest_framework import viewsets
 from rest_framework.response import Response
+from django.core.serializers import serialize
 from utils import *
 
 from User.models import *
@@ -19,15 +21,24 @@ class List(viewsets.ViewSet):
         try:
             user_id = get_user_id(request)
             friend_list = []
-            friends = Friend.objects.filter(user_id=user_id)
-            
-            for friend in friends:
+            friends_1 = Friend.objects.filter(user_id=user_id).exclude(status=0)
+            friends_2 = Friend.objects.filter(relation_id=user_id).exclude(status=0)
+            # relation_id 為自己
+            # user_id 為朋友
+            for friend in friends_1:
+                user_info = User_Info.objects.filter(email=friend.user_id).first()
                 friend_list.append({
                     'id':friend.id,
-                    'name':friend.name,
+                    'name':user_info.username,
                     'relation_type':friend.relation_type,
                 })
-
+            for friend in friends_2:
+                user_info = User_Info.objects.filter(email=friend.user_id).first()
+                friend_list.append({
+                    'id':friend.id,
+                    'name':user_info.username,
+                    'relation_type':friend.relation_type,
+                })
             return Response({'status':'0','message': 'success','friends':friend_list}, status=200)
         except Exception as e:
             print(e)
@@ -38,24 +49,27 @@ class Requests(viewsets.ViewSet):
         try:
             user_id = get_user_id(request)
             response = []
+            # 找到所有邀請自己的人
             requests = Friend.objects.filter(relation_id=user_id,status=0).all()
             for friend_request in requests:
-                user_info = User_Info.objects.get(id=friend_request.user_id)
+                # 找到邀請自己的人的資料
+                user_info = User_Info.objects.filter(email=friend_request.user_id).first()
                 response.append({
                     'id':friend_request.id,
-                    'user_id':friend_request.user_id,
+                    'user_id':user_id,
                     'relation_id':friend_request.relation_id,
-                    'type':request.relation_type,
-                    'status':request.status,
-                    'read':request.read,
-                    'created_at':request.created_at,
-                    'updated_at':request.updated_at,
+                    'type':friend_request.relation_type,
+                    'status':friend_request.status,
+                    'read':friend_request.read,
+                    'created_at':friend_request.created_at,
+                    'updated_at':friend_request.updated_at,
                     'user':{
-                        'id':user_info.user_id,
-                        'name':user_info.name,
+                        'id':user_info.id,
+                        'name':user_info.username,
                         'account':user_info.account,
                     }
                 })
+            # print(response)
             return Response({'status':'0','message': 'success','requests':response}, status=200)
         except Exception as e:
             print(e)
@@ -135,29 +149,32 @@ class Friend_Remove(viewsets.ViewSet):
 class Friend_Results(viewsets.ViewSet):
     def list(self, request):
         try:
+            
             user_id = get_user_id(request)
+            # user_id = 1
             response = []
-            friend_list = Friend.objects.filter(user_id=user_id)
+            # relation_id 為自己
+            # user_id 為朋友
+            friend_list = Friend.objects.filter(relation_id=user_id).exclude(status=0)
             for friend in friend_list:
-                if friend.relation_id == 0:
-                    continue
-                friend_info = User_Info.objects.get(id=friend.relation_id)
-                friend_info_instance = User_Info.objects.get(id=friend.user_id)
+                friend_info = User_Info.objects.filter(id=friend.relation_id).values()[0]
                 response.append({
-                    'id': friend.id,
-                    'user_id': friend.user_id,
-                    'relation_id': friend.relation_id,
-                    'type': friend.relation_type,
-                    'status': friend.status,
-                    'read': friend.read,
-                    'created_at': friend.created_at,
-                    'updated_at': friend.updated_at,
-                    'relation': {
-                        'id': friend_info_instance.id,
-                        'name': friend_info.username,
-                        'account': friend_info.account,
+                    "id": friend.id,
+                    "user_id": user_id,
+                    "relation_id": friend.relation_id,
+                    "type": friend.relation_type,
+                    "status": friend.status,
+                    "read": friend.read,
+                    "created_at": friend.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    "updated_at": friend.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    "relation": {
+                        "id": friend.relation_id,
+                        "name": friend_info['username'],
+                        "account": friend_info['email'],
                     }
                 })
+
+            # print(response)
             return Response({'status': '0', 'message': '成功', 'results': response}, status=200)
         except Exception as e:
             print(e)
