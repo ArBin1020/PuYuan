@@ -1,4 +1,3 @@
-use port 8000
 check the APP setting: **ip:port** is correct.
 
 on your desktop run docker and build the dockerfile.
